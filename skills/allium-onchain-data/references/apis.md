@@ -5,6 +5,29 @@
 
 ---
 
+## Supported Chains Discovery
+
+**Call once per session** before any `/developer/` endpoint. Returns all endpoints and their chains in one response — cache it, don't re-call. Not needed for Explorer SQL or Docs endpoints.
+
+```bash
+curl "https://api.allium.so/api/v1/supported-chains/realtime-apis/simple"
+```
+
+**Response:** Map of endpoint path → array of supported chain names.
+
+```json
+{
+  "/api/v1/developer/prices": ["arbitrum", "avalanche", "bsc", "base", "ethereum", "solana", ...],
+  "/api/v1/developer/wallet/balances": ["arbitrum", "base", "bitcoin", "ethereum", "solana", ...],
+  "/api/v1/developer/wallet/transactions": ["abstract", "arbitrum", "ethereum", "solana", ...],
+  "/api/v1/developer/wallet/pnl": ["bitcoin", "ethereum", "solana"]
+}
+```
+
+Use this to validate chain support before making data calls. Chain coverage varies per endpoint — e.g. `pnl` only supports 3 chains while `transactions` supports 20+.
+
+---
+
 ## Token Prices
 
 ### Current Price
@@ -17,15 +40,22 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices" \
 ```
 
 **Response:**
+
 ```json
-[{
-  "chain": "ethereum",
-  "address": "0x...",
-  "price": 72154.48,
-  "decimals": 8,
-  "info": {"name": "Token Name", "symbol": "TKN"},
-  "attributes": {"price_diff_1d": -3840.06, "price_diff_pct_1d": -5.05, "volume_usd_1d": 432014155.32}
-}]
+[
+	{
+		"chain": "ethereum",
+		"address": "0x...",
+		"price": 72154.48,
+		"decimals": 8,
+		"info": { "name": "Token Name", "symbol": "TKN" },
+		"attributes": {
+			"price_diff_1d": -3840.06,
+			"price_diff_pct_1d": -5.05,
+			"volume_usd_1d": 432014155.32
+		}
+	}
+]
 ```
 
 ---
@@ -46,23 +76,33 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
   }'
 ```
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `addresses` | Yes | Array of `{token_address, chain}` objects |
-| `start_timestamp` | Yes | Unix seconds |
-| `end_timestamp` | Yes | Unix seconds |
-| `time_granularity` | Yes | `1m`, `5m`, `15m`, `1h`, `4h`, `1d` |
+| Field              | Required | Notes                                     |
+| ------------------ | -------- | ----------------------------------------- |
+| `addresses`        | Yes      | Array of `{token_address, chain}` objects |
+| `start_timestamp`  | Yes      | Unix seconds                              |
+| `end_timestamp`    | Yes      | Unix seconds                              |
+| `time_granularity` | Yes      | `1m`, `5m`, `15m`, `1h`, `4h`, `1d`       |
 
 **Response:**
+
 ```json
 {
-  "items": [{
-    "mint": "0x...",
-    "chain": "ethereum",
-    "prices": [
-      {"timestamp": "2024-01-30T00:00:00Z", "open": 83977.26, "high": 84504.82, "low": 74370.21, "close": 83889.40, "price": 83925.23}
-    ]
-  }]
+	"items": [
+		{
+			"mint": "0x...",
+			"chain": "ethereum",
+			"prices": [
+				{
+					"timestamp": "2024-01-30T00:00:00Z",
+					"open": 83977.26,
+					"high": 84504.82,
+					"low": 74370.21,
+					"close": 83889.4,
+					"price": 83925.23
+				}
+			]
+		}
+	]
 }
 ```
 
@@ -79,6 +119,48 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/at-timestamp" \
 
 ---
 
+### Price Stats
+
+```bash
+curl -X POST "https://api.allium.so/api/v1/developer/prices/stats" \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: $API_KEY" \
+  -d '[{"token_address": "0x...", "chain": "ethereum"}]'
+```
+
+---
+
+## Token Lookup
+
+### Token Info by Address
+
+```bash
+curl -X POST "https://api.allium.so/api/v1/developer/tokens/chain-address" \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: $API_KEY" \
+  -d '[{"token_address": "0x...", "chain": "ethereum"}]'
+```
+
+### List Tokens
+
+```bash
+curl -X GET "https://api.allium.so/api/v1/developer/tokens" \
+  -H "X-API-KEY: $API_KEY"
+```
+
+### Token Search
+
+Don't know the address? Search first:
+
+```bash
+curl "https://api.allium.so/api/v1/developer/tokens/search?q=bitcoin" \
+  -H "X-API-KEY: $API_KEY"
+```
+
+Returns array of matches with addresses and chains.
+
+---
+
 ## Wallet Data
 
 All wallet endpoints take the same format:
@@ -90,25 +172,12 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/{endpoint}" \
   -d '[{"chain": "ethereum", "address": "0xWALLET..."}]'
 ```
 
-| Endpoint | Returns |
-|----------|---------|
-| `/balances` | Token holdings with USD values |
-| `/balances/historical` | Balance snapshots over time |
-| `/transactions` | Transaction history |
-| `/pnl` | Profit/loss by token |
-
----
-
-## Token Search
-
-Don't know the address? Search first:
-
-```bash
-curl "https://api.allium.so/api/v1/developer/tokens/search?q=bitcoin" \
-  -H "X-API-KEY: $API_KEY"
-```
-
-Returns array of matches with addresses and chains.
+| Endpoint            | Returns                        |
+| ------------------- | ------------------------------ |
+| `/balances`         | Token holdings with USD values |
+| `/balances/history` | Balance snapshots over time    |
+| `/transactions`     | Transaction history            |
+| `/pnl`              | Profit/loss by token           |
 
 ---
 
@@ -175,32 +244,34 @@ curl "https://api.allium.so/api/v1/docs/schemas/browse?path=" -H "X-API-KEY: $AP
 
 # List tables
 curl "https://api.allium.so/api/v1/docs/schemas/browse?path=ethereum.raw" -H "X-API-KEY: $API_KEY"
+
+# Semantic search for table names
+curl "https://api.allium.so/api/v1/docs/schemas/search?q=nft+transfers" -H "X-API-KEY: $API_KEY"
 ```
 
 ---
 
 ## Errors
 
-| Status | Meaning | Fix |
-|--------|---------|-----|
-| 400 | Bad request | Check JSON syntax |
-| 401 | Unauthorized | Check API key |
-| 422 | Validation failed | **Check request format** — common with /history |
-| 429 | Rate limited | Wait 1 second |
-| 500 | Server error | Retry with backoff |
+| Status | Meaning           | Fix                                             |
+| ------ | ----------------- | ----------------------------------------------- |
+| 400    | Bad request       | Check JSON syntax                               |
+| 401    | Unauthorized      | Check API key                                   |
+| 422    | Validation failed | **Check request format** — common with /history |
+| 429    | Rate limited      | Wait 1 second                                   |
+| 500    | Server error      | Retry with backoff                              |
 
 ---
 
 ## Documentation & Schema Discovery
 
-Five endpoints for finding docs and table schemas. Use these before guessing.
+Three endpoints for finding docs and table schemas. Use these before guessing.
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/v1/docs/docs/browse` | GET | Browse doc hierarchy like a filesystem |
-| `/api/v1/docs/docs/search` | POST | Semantic search across all docs |
-| `/api/v1/docs/schemas/browse` | GET | Browse databases → schemas → tables |
-| `/api/v1/docs/schemas/search` | POST | Semantic search for table names |
+| Endpoint                      | Method | Purpose                                |
+| ----------------------------- | ------ | -------------------------------------- |
+| `/api/v1/docs/docs/browse`    | GET    | Browse doc hierarchy like a filesystem |
+| `/api/v1/docs/schemas/browse` | GET    | Browse databases → schemas → tables    |
+| `/api/v1/docs/schemas/search` | GET    | Semantic search for table names        |
 
 ### Browse Docs
 
@@ -214,17 +285,6 @@ curl "https://api.allium.so/api/v1/docs/docs/browse?path=api/developer" -H "X-AP
 # Get file content (truncated to 5000 chars)
 curl "https://api.allium.so/api/v1/docs/docs/browse?path=api/overview.mdx" -H "X-API-KEY: $API_KEY"
 ```
-
-### Search Docs
-
-```bash
-curl -X POST "https://api.allium.so/api/v1/docs/docs/search" \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: $API_KEY" \
-  -d '{"query": "wallet balances historical data"}'
-```
-
-Returns `results[]` with `content`, `path`, and `metadata` (title, description).
 
 ### Browse Schemas
 
@@ -246,10 +306,7 @@ curl "https://api.allium.so/api/v1/docs/schemas/browse?path=ethereum.raw.blocks"
 Find tables by meaning, not exact name:
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/docs/schemas/search" \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: $API_KEY" \
-  -d '{"query": "DEX trades swaps"}'
+curl "https://api.allium.so/api/v1/docs/schemas/search?q=DEX+trades+swaps" -H "X-API-KEY: $API_KEY"
 ```
 
-Returns `{"ids": ["ethereum.raw.blocks", ...]}` — full table names. Feed these into Browse Schemas for column details.
+Returns table name matches. Feed these into Browse Schemas for column details.
