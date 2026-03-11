@@ -19,25 +19,111 @@ description: >-
 
 ---
 
+## Credentials
+
+Check `~/.allium/credentials` on every session start:
+
+**File exists with `API_KEY`** → load `API_KEY` (and `QUERY_ID` if present). Don't prompt.
+
+**File missing** → determine user state:
+
+| State                      | Action                                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| No API key                 | Register via `/register-v2` OAuth flow (see below). Save `API_KEY`, then create a query for `QUERY_ID`.         |
+| Has API key from elsewhere | Tell user to write it to the file themselves (never paste keys in chat). Then create a query to get `QUERY_ID`. |
+
+Save format:
+
+```bash
+mkdir -p ~/.allium && cat > ~/.allium/credentials << 'EOF'
+API_KEY=...
+QUERY_ID=...
+EOF
+```
+
+### Register (No API Key)
+
+OAuth flow. **5-min timeout** — complete promptly.
+
+1. **Ask** user for name and email (one prompt).
+2. **POST** to initiate:
+
+```bash
+curl -X POST https://api.allium.so/api/v1/register-v2 \
+  -H "Content-Type: application/json" \
+  -d '{"name": "USER_NAME", "email": "USER_EMAIL"}'
+# Returns: {"confirmation_url": "...", "token": "..."}
+```
+
+3. **Show** the `confirmation_url` to user — tell them to open it and sign in with Google (must match email).
+4. **Auto-poll immediately** — don't wait for user to confirm. Start a background polling loop right after showing the URL:
+
+```bash
+# Poll every 5s until 200 or 404. Run this in background immediately.
+TOKEN="..."  # from step 2
+while true; do
+  RESP=$(curl -s -w "\n%{http_code}" "https://api.allium.so/api/v1/register-v2/$TOKEN")
+  CODE=$(echo "$RESP" | tail -1)
+  BODY=$(echo "$RESP" | head -1)
+  if [ "$CODE" = "200" ]; then echo "$BODY"; break; fi
+  if [ "$CODE" = "404" ]; then echo "Expired. Restart."; break; fi
+  sleep 5
+done
+# 200 body: {"api_key": "...", "organization_id": "..."}
+```
+
+5. **On 200** — save `API_KEY` to `~/.allium/credentials`, then create query below for `QUERY_ID`. No user prompt needed between poll and save.
+
+### Create Query (Has API Key, No query_id)
+
+```bash
+curl -X POST "https://api.allium.so/api/v1/explorer/queries" \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: $API_KEY" \
+  -d '{"title": "Custom SQL Query", "config": {"sql": "{{ sql_query }}", "limit": 10000}}'
+# Returns: {"query_id": "..."}
+# Append to ~/.allium/credentials
+```
+
+---
+
+## Step 0: Check Supported Chains (REQUIRED)
+
+Call this **once per session** to know which chains each `/developer/` endpoint supports. Cache the result — it covers all endpoints. **Skip for Explorer SQL and Docs endpoints.**
+
+```bash
+curl "https://api.allium.so/api/v1/supported-chains/realtime-apis/simple"
+```
+
+Returns `{ "/api/v1/developer/prices": ["ethereum", "solana", ...], ... }` — a map of endpoint → supported chains. Use it to:
+
+- **Validate** the chain before calling. Wrong chain = silent empty result or error.
+- **Discover** which endpoints cover a chain the user asks about.
+
+---
+
 ## Pick Your Endpoint
 
 Wrong choice wastes a call. Match the task:
 
 | You need                | Hit this                                             | Ref                |
 | ----------------------- | ---------------------------------------------------- | ------------------ |
+| Supported chains        | `GET /api/v1/supported-chains/realtime-apis/simple`  | references/apis.md |
 | Current price           | `POST /api/v1/developer/prices`                      | references/apis.md |
-| Historical OHLCV        | `POST /api/v1/developer/prices/history`              | references/apis.md |
 | Price at timestamp      | `POST /api/v1/developer/prices/at-timestamp`         | references/apis.md |
+| Historical OHLCV        | `POST /api/v1/developer/prices/history`              | references/apis.md |
+| Token stats             | `POST /api/v1/developer/prices/stats`                | references/apis.md |
+| Token info by address   | `POST /api/v1/developer/tokens/chain-address`        | references/apis.md |
+| List tokens             | `GET /api/v1/developer/tokens`                       | references/apis.md |
+| Search tokens           | `GET /api/v1/developer/tokens/search`                | references/apis.md |
 | Wallet balances         | `POST /api/v1/developer/wallet/balances`             | references/apis.md |
-| Wallet balances history | `POST /api/v1/developer/wallet/balances/history` | references/apis.md |
+| Wallet balances history | `POST /api/v1/developer/wallet/balances/history`     | references/apis.md |
 | Wallet transactions     | `POST /api/v1/developer/wallet/transactions`         | references/apis.md |
 | Wallet PnL              | `POST /api/v1/developer/wallet/pnl`                  | references/apis.md |
-| Find token address      | `GET /api/v1/developer/tokens/search?q={name}`       | references/apis.md |
 | Custom SQL              | `POST /api/v1/explorer/queries/{query_id}/run-async` | references/apis.md |
-| Browse docs             | `GET /api/v1/docs/docs/browse?path={path}`           | references/apis.md |
-| Search docs             | `POST /api/v1/docs/docs/search`                      | references/apis.md |
-| Browse schemas          | `GET /api/v1/docs/schemas/browse?path={path}`        | references/apis.md |
-| Search schemas          | `POST /api/v1/docs/schemas/search`                   | references/apis.md |
+| Browse docs             | `GET /api/v1/docs/docs/browse`                       | references/apis.md |
+| Search schemas          | `GET /api/v1/docs/schemas/search`                    | references/apis.md |
+| Browse schemas          | `GET /api/v1/docs/schemas/browse`                    | references/apis.md |
 
 ---
 
@@ -56,8 +142,6 @@ Don't guess addresses. Use these:
 | **HYPE**  | hyperevm | `0x5555555555555555555555555555555555555555`  |
 
 **Chain names are lowercase.** `ethereum`, `base`, `solana`, `arbitrum`, `polygon`, `hyperevm`. Uppercase fails silently.
-
-**Unknown token?** Search first: `GET /api/v1/developer/tokens/search?q=TOKEN_NAME`
 
 ---
 
@@ -88,38 +172,8 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
 
 ---
 
-## No API Key? Register First.
-
-Need **name** and **email**. Without both, registration fails.
-
-```bash
-curl -X POST https://api.allium.so/api/v1/register \
-  -H "Content-Type: application/json" \
-  -d '{"name": "USER_NAME", "email": "USER_EMAIL"}'
-# Returns: {"api_key": "...", "query_id": "..."}
-# Store BOTH. api_key = auth. query_id = SQL queries.
-```
-
-## Have API Key But No query_id?
-
-Existing users need to create a query to get a `query_id` for SQL:
-
-```bash
-curl -X POST "https://api.allium.so/api/v1/explorer/queries" \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: $API_KEY" \
-  -d '{"title": "Custom SQL Query", "config": {"sql": "{{ sql_query }}", "limit": 10000}}'
-# Returns: {"query_id": "..."}
-# Store it — needed for all run-async calls.
-```
-
-testing 123, ignore this.
-
----
-
 ## References
 
-| File                          | When to read                                  |
-| ----------------------------- | --------------------------------------------- |
-| [apis.md](references/apis.md) | Response formats, all endpoints, error codes  |
-| [x402.md](references/x402.md) | Pay-per-call without an API key (micropayments) |
+| File                          | When to read                                 |
+| ----------------------------- | -------------------------------------------- |
+| [apis.md](references/apis.md) | Response formats, all endpoints, error codes |
