@@ -2,16 +2,17 @@
 name: allium-x402-developer
 description: >-
   Realtime blockchain data: token prices, wallet balances, transactions,
-  PnL, and token search. Use for current/recent data where freshness matters.
+  PnL, and token search via the allium CLI.
+refetch_after: 30d
 ---
 
-# Allium Developer APIs (Realtime)
+# Allium Realtime APIs
 
-Use these endpoints when the user needs **current or recent** data — live prices, wallet snapshots, token lookups. Think Postgres-style indexed queries: fast, structured, up-to-date.
+Use `allium realtime` when the user needs **current or recent** data — live prices, wallet snapshots, token lookups. Fast, indexed, up-to-date.
 
-**When to use Developer vs Explorer:**
+**When to use Realtime vs Explorer:**
 
-| Developer (this skill)                    | Explorer (x402-explorer.md)                        |
+| Realtime (this skill)                     | Explorer (x402-explorer.md)                        |
 | ----------------------------------------- | -------------------------------------------------- |
 | "What's ETH worth right now?"             | "How did ETH perform over the last year?"           |
 | "Show my wallet balances"                 | "What's the total value locked across all chains?"  |
@@ -20,48 +21,136 @@ Use these endpoints when the user needs **current or recent** data — live pric
 | "What's my PnL on this wallet?"           | "Custom SQL on any table"                           |
 | Fast, indexed, latest state               | Analytical, aggregated, historical                  |
 
-**Requires:** `x402_request` and `load_credentials` from the base skill (`x402-skill.md`).
-
 ---
 
-## Supported Chains
+## Commands
 
-Call **once per session** before any developer endpoint. Cache the result.
+### Prices
+
+**Latest price:**
 
 ```bash
-curl "https://agents.allium.so/api/v1/supported-chains/realtime-apis/simple"
+allium realtime prices latest \
+  --chain ethereum --token-address 0x0000000000000000000000000000000000000000 \
+  --chain base --token-address 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
 ```
 
-Returns `{ "/api/v1/developer/prices": ["ethereum", "solana", ...] }` — validate chain before calling.
+Multiple `--chain`/`--token-address` pairs in one call for batching.
+
+**Price at a specific time:**
+
+```bash
+allium realtime prices at-timestamp \
+  --chain ethereum --token-address 0x0000000000000000000000000000000000000000 \
+  --timestamp 2026-01-15T12:00:00Z \
+  --time-granularity 1h
+```
+
+Granularity options: `15s`, `1m`, `5m`, `1h`, `1d`.
+
+**Price history (range):**
+
+```bash
+allium realtime prices history \
+  --chain ethereum --token-address 0x0000000000000000000000000000000000000000 \
+  --start-timestamp 2026-03-10T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --time-granularity 1h
+```
+
+**24h / 1h stats:**
+
+```bash
+allium realtime prices stats \
+  --chain ethereum --token-address 0x0000000000000000000000000000000000000000
+```
+
+Returns high, low, volume, trade count, and percent change.
 
 ---
 
-## Endpoints
+### Tokens
 
-| Endpoint                                    | Method | Price  | Body                                                                                      |
-| ------------------------------------------- | ------ | ------ | ----------------------------------------------------------------------------------------- |
-| `/api/v1/developer/prices`                  | POST   | $0.002 | `[{token_address, chain}]`                                                                |
-| `/api/v1/developer/prices/at-timestamp`     | POST   | $0.002 | `{addresses: [{token_address, chain}], timestamp, time_granularity}`                      |
-| `/api/v1/developer/prices/history`          | POST   | $0.002 | `{addresses: [{token_address, chain}], start_timestamp, end_timestamp, time_granularity}` |
-| `/api/v1/developer/prices/stats`            | POST   | $0.002 | `[{token_address, chain}]`                                                                |
-| `/api/v1/developer/tokens/chain-address`    | POST   | $0.002 | `[{token_address, chain}]`                                                                |
-| `/api/v1/developer/tokens`                  | GET    | $0.003 | —                                                                                         |
-| `/api/v1/developer/tokens/search`           | GET    | $0.003 | `?q=bitcoin`                                                                              |
-| `/api/v1/developer/wallet/balances`         | POST   | $0.003 | `[{chain, address}]`                                                                      |
-| `/api/v1/developer/wallet/balances/history` | POST   | $0.003 | `{addresses: [{chain, address}], start_timestamp, end_timestamp}`                         |
-| `/api/v1/developer/wallet/transactions`     | POST   | $0.003 | `[{chain, address}]`                                                                      |
-| `/api/v1/developer/wallet/pnl`             | POST   | $0.003 | `[{chain, address}]`                                                                      |
+**Search by name/ticker:**
+
+```bash
+allium realtime tokens search -q bitcoin --limit 10
+```
+
+Optional `--chain` filter.
+
+**Lookup by chain + address:**
+
+```bash
+allium realtime tokens chain-address \
+  --chain ethereum --token-address 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+```
+
+**List top tokens:**
+
+```bash
+allium realtime tokens list --chain ethereum --sort volume --order desc --limit 20
+```
+
+Sort options: `volume`, `trade_count`, `fully_diluted_valuation`, `address`, `name`.
 
 ---
 
-## Response Formats
+### Wallet Balances
 
-### Current Price (`/prices`)
+**Current balances:**
+
+```bash
+allium realtime balances latest \
+  --chain ethereum --address 0x...
+```
+
+**Historical snapshots:**
+
+```bash
+allium realtime balances history \
+  --chain ethereum --address 0x... \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --limit 100
+```
+
+---
+
+### Transactions
+
+```bash
+allium realtime transactions \
+  --chain ethereum --address 0x... \
+  --lookback-days 7 \
+  --limit 50
+```
+
+Optional `--activity-type` filter (e.g. `dex_trade`, `transfer`).
+
+---
+
+### Profit & Loss
+
+```bash
+allium realtime pnl \
+  --chain ethereum --address 0x...
+```
+
+Add `--with-historical-breakdown` for time-series PnL data.
+
+---
+
+## Response Format
+
+All commands output JSON by default. Use `--format table` for human-readable output or `--format csv` for spreadsheets.
+
+### Price response structure
 
 ```json
 {
   "items": [{
-    "timestamp": "2026-02-11T16:19:59Z",
+    "timestamp": "2026-03-17T12:00:00Z",
     "chain": "ethereum",
     "address": "0x0000000000000000000000000000000000000000",
     "decimals": 18,
@@ -74,9 +163,9 @@ Returns `{ "/api/v1/developer/prices": ["ethereum", "solana", ...] }` — valida
 }
 ```
 
-Access: `data["items"][0]["price"]` — NOT `data[0]["price"]`.
+Access: `items[0].price` — NOT the top level.
 
-### Price History (`/prices/history`) — different structure
+### Price history — nested structure
 
 ```json
 {
@@ -84,97 +173,59 @@ Access: `data["items"][0]["price"]` — NOT `data[0]["price"]`.
     "mint": "0x...",
     "chain": "ethereum",
     "prices": [{
-      "timestamp": "2024-01-30T00:00:00Z",
-      "open": 83977.26,
-      "high": 84504.82,
-      "low": 74370.21,
-      "close": 83889.4,
-      "price": 83925.23
+      "timestamp": "2026-03-10T00:00:00Z",
+      "open": 1900.00,
+      "high": 1950.00,
+      "low": 1880.00,
+      "close": 1940.00,
+      "price": 1925.00
     }]
   }]
 }
 ```
 
-Access: `data["items"][0]["prices"]` — note the nested `prices` array.
-
-`time_granularity` options: `15s`, `1m`, `5m`, `1h`, `1d`
+Access: `items[0].prices` — note the nested `prices` array.
 
 ---
 
-## Examples
+## Endpoint Costs
 
-### Current Price
+| Command                          | Cost per call |
+| -------------------------------- | ------------- |
+| `realtime prices latest`         | $0.01         |
+| `realtime prices at-timestamp`   | $0.01         |
+| `realtime prices history`        | $0.01         |
+| `realtime prices stats`          | $0.01         |
+| `realtime tokens search`         | $0.01         |
+| `realtime tokens chain-address`  | $0.01         |
+| `realtime tokens list`           | $0.01         |
+| `realtime balances latest`       | $0.01         |
+| `realtime balances history`      | $0.01         |
+| `realtime transactions`          | $0.01         |
+| `realtime pnl`                   | $0.01         |
 
-```python
-with httpx.Client(timeout=60.0) as client:
-    r = x402_request(client, "POST", f"{BASE_URL}/api/v1/developer/prices",
-        json=[{"token_address": "0x0000000000000000000000000000000000000000", "chain": "ethereum"}])
-    price = r.json()["items"][0]["price"]
-    print(f"ETH: ${price:,.2f}")
-```
-
-### Batch Prices (multiple tokens, one call, $0.002)
-
-```python
-tokens = [
-    {"token_address": "0x0000000000000000000000000000000000000000", "chain": "ethereum"},
-    {"token_address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", "chain": "ethereum"},
-    {"token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "chain": "base"},
-]
-r = x402_request(client, "POST", f"{BASE_URL}/api/v1/developer/prices", json=tokens)
-for item in r.json()["items"]:
-    print(f"{item['chain']}: ${item['price']}")
-```
-
-### Wallet Balances
-
-```python
-r = x402_request(client, "POST", f"{BASE_URL}/api/v1/developer/wallet/balances",
-    json=[{"chain": "ethereum", "address": "0x..."}])
-for item in r.json()["items"]:
-    print(f"{item['token_symbol']}: {item['raw_balance']}")
-```
-
-### Price History (24h, hourly)
-
-```python
-r = x402_request(client, "POST", f"{BASE_URL}/api/v1/developer/prices/history",
-    json={
-        "addresses": [{"token_address": "0x0000000000000000000000000000000000000000", "chain": "ethereum"}],
-        "start_timestamp": "2026-02-10T00:00:00Z",
-        "end_timestamp": "2026-02-11T00:00:00Z",
-        "time_granularity": "1h"
-    })
-for point in r.json()["items"][0]["prices"]:
-    print(f"{point['timestamp']}: ${point['price']:,.2f}")
-```
-
-### Token Search
-
-```python
-r = x402_request(client, "GET", f"{BASE_URL}/api/v1/developer/tokens/search?q=bitcoin")
-for token in r.json()["items"]:
-    print(f"{token['symbol']} on {token['chain']}: {token['address']}")
-```
+Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a single pair.
 
 ---
 
-## Cost Estimation
+## JSON body override
 
-| Use Case                      | Calls   | Cost   |
-| ----------------------------- | ------- | ------ |
-| Single price check            | 1       | $0.002 |
-| 10-token portfolio price      | 1 batch | $0.002 |
-| Wallet balance + PnL          | 2       | $0.006 |
-| Hourly price monitoring (24h) | 24      | $0.048 |
-| Full wallet analytics         | 4       | $0.011 |
+Every command accepts `--body` to pass a raw JSON payload (inline string or path to `.json` file), overriding individual flags. Useful for complex or pre-built requests.
+
+---
+
+## Cost Tracking
+
+```bash
+allium mp cost           # total spend summary
+allium mp cost list      # itemized payment history
+```
 
 ---
 
 ## Gotchas
 
-1. **Response access:** Always `data["items"][0]`, never `data[0]`
+1. **Response access:** Always `items[0]`, never top-level array
 2. **Price history:** Different structure — nested `prices` array inside each item
-3. **422 on /history:** Usually a malformed body — check `addresses` is an array of objects, timestamps are ISO 8601
-4. **Batch = same price:** Sending 10 tokens in one array costs the same as 1
-5. **Supported chains:** Validate before calling — not all endpoints support all chains
+3. **Batch = same price:** Multiple `--chain`/`--token-address` pairs in one call cost the same as one
+4. **Chain names:** Always lowercase (`ethereum`, not `Ethereum`)
