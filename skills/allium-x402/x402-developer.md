@@ -192,17 +192,17 @@ Access: `items[0].prices` — note the nested `prices` array.
 
 | Command                          | Cost per call |
 | -------------------------------- | ------------- |
-| `realtime prices latest`         | $0.01         |
-| `realtime prices at-timestamp`   | $0.01         |
-| `realtime prices history`        | $0.01         |
-| `realtime prices stats`          | $0.01         |
-| `realtime tokens search`         | $0.01         |
-| `realtime tokens chain-address`  | $0.01         |
-| `realtime tokens list`           | $0.01         |
-| `realtime balances latest`       | $0.01         |
-| `realtime balances history`      | $0.01         |
-| `realtime transactions`          | $0.01         |
-| `realtime pnl`                   | $0.01         |
+| `realtime prices latest`         | $0.02         |
+| `realtime prices at-timestamp`   | $0.02         |
+| `realtime prices history`        | $0.02         |
+| `realtime prices stats`          | $0.02         |
+| `realtime tokens search`         | $0.03         |
+| `realtime tokens chain-address`  | $0.02         |
+| `realtime tokens list`           | $0.03         |
+| `realtime balances latest`       | $0.03         |
+| `realtime balances history`      | $0.03         |
+| `realtime transactions`          | $0.03         |
+| `realtime pnl`                   | $0.03         |
 
 Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a single pair.
 
