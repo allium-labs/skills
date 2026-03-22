@@ -130,14 +130,44 @@ Optional `--activity-type` filter (e.g. `dex_trade`, `transfer`).
 
 ---
 
+### Holdings
+
+**Historical Holdings:**
+
+```bash
+allium realtime holdings history \
+  --chain ethereum --address 0x... \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --granularity 1d \
+  --limit 100
+```
+
+Granularity options: `15s`, `1m`, `5m`, `1h`, `1d`.
+
+---
+
 ### Profit & Loss
+
+**Current PnL:**
 
 ```bash
 allium realtime pnl \
   --chain ethereum --address 0x...
 ```
 
-Add `--with-historical-breakdown` for time-series PnL data.
+**Historical PnL:**
+
+```bash
+allium realtime pnl history \
+  --chain ethereum --address 0x... \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --granularity 1d \
+  --limit 100
+```
+
+Granularity options: `15s`, `1m`, `5m`, `1h`, `1d`.
 
 ---
 
@@ -186,6 +216,151 @@ Access: `items[0].price` — NOT the top level.
 
 Access: `items[0].prices` — note the nested `prices` array.
 
+
+### PnL response structure
+
+```json
+{
+    "items": [
+        {
+            "chain": "solana",
+            "address": "3e...",
+            "tokens": [
+                {
+                    "token_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "average_cost": {
+                        "currency": "USD",
+                        "amount": "0.998741156892067249"
+                    },
+                    "raw_balance": "488.789246",
+                    "current_price": {
+                        "currency": "USD",
+                        "amount": "1.001312436654786531"
+                    },
+                    "current_balance": {
+                        "currency": "USD",
+                        "amount": "489.430750922915870637"
+                    },
+                    "realized_pnl": {
+                        "currency": "USD",
+                        "amount": "138.681338640813260490"
+                    },
+                    "unrealized_pnl": {
+                        "currency": "USD",
+                        "amount": "1.256813896474616383"
+                    },
+                    "unrealized_pnl_ratio_change": 0.00257452068033395,
+                    "attributes": {
+                        "total_liquidity_usd": {
+                            "details": "LIQUIDITY_TOO_HIGH"
+                        }
+                    }
+                },
+                {
+                    "token_address": "2YLjY53bLtsJn3Aq2wFHdF2fUeTPqYDcbNPWJ6w9pump",
+                    "average_cost": {
+                        "currency": "USD",
+                        "amount": "0.001000297862358017"
+                    },
+                    "raw_balance": "85900.15",
+                    "current_price": {
+                        "currency": "USD",
+                        "amount": "0.001000606229732188"
+                    },
+                    "current_balance": {
+                        "currency": "USD",
+                        "amount": "85.952225224929403749"
+                    },
+                    "realized_pnl": {
+                        "currency": "USD",
+                        "amount": "0E-18"
+                    },
+                    "unrealized_pnl": {
+                        "currency": "USD",
+                        "amount": "0.026488803696411861"
+                    },
+                    "unrealized_pnl_ratio_change": 0.0003082755504888085,
+                    "attributes": {
+                        "total_liquidity_usd": {
+                            "amount": 2001212.5853097588
+                        }
+                    }
+                }
+            ],
+            "total_balance": {
+                "currency": "USD",
+                "amount": "575.382976148"
+            },
+            "total_realized_pnl": {
+                "currency": "USD",
+                "amount": "138.681338640813260490"
+            },
+            "total_unrealized_pnl": {
+                "currency": "USD",
+                "amount": "1.28330270017"
+            },
+            "total_unrealized_pnl_ratio_change": 0.0022253819
+        }
+    ]
+}
+```
+
+Access:
+- `items[0]["tokens"]` for PnL of each token owned by the wallet
+- `items[0]["total_unrealized_pnl"]` for total unrealized PnL (in USD) of the wallet
+- `items[0]["total_realized_pnl"]` for total realized PnL (in USD) of the wallet
+- `items[0]["total_balance"]` for total balance (in USD) of the wallet
+
+### PnL history — nested structure
+
+```json
+{
+    "items": [
+        {
+            "chain": "solana",
+            "address": "3e...",
+            "pnl": [
+                {
+                    "timestamp": "2025-11-04T00:00:00Z",
+                    "unrealized_pnl": {
+                        "currency": "USD",
+                        "amount": "-4643.831342118258219999"
+                    },
+                    "realized_pnl": {
+                        "currency": "USD",
+                        "amount": "4477.313380917999945427"
+                    }
+                },
+                {
+                    "timestamp": "2025-11-05T00:00:00Z",
+                    "unrealized_pnl": {
+                        "currency": "USD",
+                        "amount": "-5119.419867080520112712"
+                    },
+                    "realized_pnl": {
+                        "currency": "USD",
+                        "amount": "4476.494797472309850168"
+                    }
+                },
+                {
+                    "timestamp": "2025-11-06T00:00:00Z",
+                    "unrealized_pnl": {
+                        "currency": "USD",
+                        "amount": "-5349.195516643782533032"
+                    },
+                    "realized_pnl": {
+                        "currency": "USD",
+                        "amount": "4476.170682321219571894"
+                    }
+                }
+            ]
+        }
+    ]
+}
+```
+
+Access: `items[0]["pnl"]` — note the nested `pnl` array.
+
 ---
 
 ## Endpoint Costs
@@ -199,10 +374,12 @@ Access: `items[0].prices` — note the nested `prices` array.
 | `realtime tokens search`         | $0.03         |
 | `realtime tokens chain-address`  | $0.02         |
 | `realtime tokens list`           | $0.03         |
-| `realtime balances latest`       | $0.03         |
-| `realtime balances history`      | $0.03         |
+| `realtime balances latest`       | $0.01         |
+| `realtime balances history`      | $0.01         |
+| `realtime holdings history`      | $0.01         |
 | `realtime transactions`          | $0.03         |
-| `realtime pnl`                   | $0.03         |
+| `realtime pnl`                   | $0.01         |
+| `realtime pnl history`           | $0.01         |
 
 Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a single pair.
 

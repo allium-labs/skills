@@ -28,11 +28,11 @@ refetch_after: 30d
 
 Read the user's request, then **fetch the matching skill** before proceeding.
 
-| User wants…                                                      | Fetch                                                        |
-| ---------------------------------------------------------------- | ------------------------------------------------------------ |
-| First-time setup, authentication configuration                   | `curl -s https://agents.allium.so/skills/x402-setup.md`     |
-| Current prices, wallet balances, token info, recent transactions | `curl -s https://agents.allium.so/skills/x402-developer.md` |
-| Historical analysis, cross-chain metrics, custom SQL             | `curl -s https://agents.allium.so/skills/x402-explorer.md`  |
+| User wants…                                                                                | Fetch                                                       |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| First-time setup, authentication configuration                                             | `curl -s https://agents.allium.so/skills/x402-setup.md`     |
+| Current prices, wallet balances, token info, recent transactions, pnl, historical holdings | `curl -s https://agents.allium.so/skills/x402-developer.md` |
+| Historical analysis, cross-chain metrics, custom SQL                                       | `curl -s https://agents.allium.so/skills/x402-explorer.md`  |
 
 If unsure, fetch **developer** for realtime questions or **explorer** for analytical questions.
 
