@@ -118,8 +118,10 @@ Wrong choice wastes a call. Match the task:
 | Search tokens           | `GET /api/v1/developer/tokens/search`                | references/apis.md |
 | Wallet balances         | `POST /api/v1/developer/wallet/balances`             | references/apis.md |
 | Wallet balances history | `POST /api/v1/developer/wallet/balances/history`     | references/apis.md |
+| Wallet holdings history | `POST /api/v1/developer/wallet/holdings/history`     | references/apis.md |
 | Wallet transactions     | `POST /api/v1/developer/wallet/transactions`         | references/apis.md |
-| Wallet PnL              | `POST /api/v1/developer/wallet/pnl`                  | references/apis.md |
+| Wallet latest PnL       | `POST /api/v1/developer/wallet/pnl`                  | references/apis.md |
+| Wallet historical PnL   | `POST /api/v1/developer/wallet/pnl/history`          | references/apis.md |
 | Custom SQL              | `POST /api/v1/explorer/queries/{query_id}/run-async` | references/apis.md |
 | Browse docs             | `GET /api/v1/docs/docs/browse`                       | references/apis.md |
 | Search schemas          | `GET /api/v1/docs/schemas/search`                    | references/apis.md |
