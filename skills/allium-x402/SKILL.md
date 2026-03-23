@@ -70,11 +70,55 @@ Chain names are **lowercase**: `ethereum`, `base`, `solana`, `arbitrum`, `polygo
 
 | Status | Action                                               |
 | ------ | ---------------------------------------------------- |
+| 400    | Check JSON syntax                                    |
+| 401    | Check API key / auth configuration                   |
 | 402    | Payment required — CLI handles this automatically    |
 | 422    | Check request format — common with history endpoints |
 | 429    | Wait 1 second, then retry                            |
 | 500    | Retry with backoff                                   |
 | 408    | Query timed out — use `allium explorer status` to poll |
+
+### Error Response Bodies
+
+**422 Validation Error** (most common — wrong request format):
+
+```json
+{
+	"detail": [
+		{
+			"loc": ["body", "addresses"],
+			"msg": "field required",
+			"type": "value_error.missing"
+		}
+	]
+}
+```
+
+Check `detail[].loc` to see which field is wrong. Common cause: using flat flags instead of the expected structure for history endpoints.
+
+**401 Unauthorized:**
+
+```json
+{"detail": "Invalid API key"}
+```
+
+Run `allium auth setup` to reconfigure authentication.
+
+**429 Rate Limited:**
+
+```json
+{"detail": "Rate limit exceeded. Please retry after 1 second."}
+```
+
+Wait 1 second and retry. Do not batch-retry.
+
+**400 Bad Request:**
+
+```json
+{"detail": "Invalid JSON body"}
+```
+
+Check `--body` JSON syntax if using raw payload override.
 
 ---
 
