@@ -11,7 +11,7 @@ These apply to all `/developer/` endpoints:
 
 - **Wrapper:** Most endpoints return `{ "items": [...] }`. Exception: `POST /developer/tokens` returns a raw array `[{...}]`.
 - **Money amounts:** `{ "currency": "USD", "amount": "string" }` — `amount` is a string for arbitrary precision (e.g. `"138.681338640813260490"`). Never parse as float for financial calculations.
-- **Timestamps:** Responses use ISO 8601 UTC (`"2026-03-17T12:00:00Z"`). Requests accept either Unix seconds (`1706572800`) or ISO 8601 strings — see [Timestamp Formats](#timestamp-formats).
+- **Timestamps:** Responses use ISO 8601 UTC. Requests accept ISO 8601 strings — see [Timestamp Formats](#timestamp-formats).
 - **Nullable fields:** Present in the response but set to `null`, sometimes omitted. Not safe to access without key-existence checks.
 - **Naming:** `mint` in price history responses = `token_address` in requests = `address` in other responses. All three mean the on-chain contract address.
 
@@ -124,18 +124,18 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
   -H "X-API-KEY: $API_KEY" \
   -d '{
     "addresses": [{"token_address": "0x...", "chain": "ethereum"}],
-    "start_timestamp": 1706572800,
-    "end_timestamp": 1707177600,
+    "start_timestamp": "2024-01-30T00:00:00Z",
+    "end_timestamp": "2024-02-06T00:00:00Z",
     "time_granularity": "1d"
   }'
 ```
 
-| Field              | Required | Notes                                     |
-| ------------------ | -------- | ----------------------------------------- |
-| `addresses`        | Yes      | Array of `{token_address, chain}` objects |
-| `start_timestamp`  | Yes      | Unix seconds or ISO 8601 string           |
-| `end_timestamp`    | Yes      | Unix seconds or ISO 8601 string           |
-| `time_granularity` | Yes      | `1m`, `5m`, `15m`, `1h`, `4h`, `1d`       |
+| Field              | Required | Notes                                       |
+| ------------------ | -------- | ------------------------------------------- |
+| `addresses`        | Yes      | Array of `{token_address, chain}` objects   |
+| `start_timestamp`  | Yes      | ISO 8601 string |
+| `end_timestamp`    | Yes      | ISO 8601 string |
+| `time_granularity` | Yes      | `1m`, `5m`, `15m`, `1h`, `1d`               |
 
 **Response:**
 
@@ -195,14 +195,14 @@ Returns the OHLCV candle at a specific point in time.
 curl -X POST "https://api.allium.so/api/v1/developer/prices/at-timestamp" \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: $API_KEY" \
-  -d '{"addresses": [{"token_address": "0x...", "chain": "ethereum"}], "timestamp": 1706572800, "time_granularity": "1h"}'
+  -d '{"addresses": [{"token_address": "0x...", "chain": "ethereum"}], "timestamp": "2024-01-30T00:00:00Z", "time_granularity": "1h"}'
 ```
 
 | Field | Required | Notes |
 |---|---|---|
 | `addresses` | Yes | Array of `{token_address, chain}` objects |
 | `chain` | Yes | Lowercase chain name |
-| `timestamp` | Yes | Unix seconds or ISO 8601 string |
+| `timestamp` | Yes | ISO 8601 string |
 | `time_granularity` | No | `15s`, `1m`, `5m`, `1h`, `1d` (default: `1h`) |
 
 **Response:**
@@ -585,14 +585,14 @@ Returns raw balance of wallet over time for every balance change in specified ti
 curl -X POST "https://api.allium.so/api/v1/developer/wallet/balances/history" \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: $API_KEY" \
-  -d '{"addresses": [{"address": "0x...", "chain": "ethereum"}], "start_timestamp": "1773259200", "end_timestamp": "1773273600"}'
+  -d '{"addresses": [{"address": "0x...", "chain": "ethereum"}], "start_timestamp": "2026-03-11T20:00:00Z", "end_timestamp": "2026-03-12T00:00:00Z"}'
 ```
 
 | Field | Required | Notes |
 |---|---|---|
 | `addresses` | Yes | Array of `{address, chain}` objects |
-| `start_timestamp` | Yes | Unix seconds or ISO 8601 string |
-| `end_timestamp` | Yes | Unix seconds or ISO 8601 string |
+| `start_timestamp` | Yes | ISO 8601 string |
+| `end_timestamp` | Yes | ISO 8601 string |
 
 **Response:**
 
@@ -668,14 +668,14 @@ Returns USD Holdings of wallet over time at specified granularity time intervals
 curl -X POST "https://api.allium.so/api/v1/developer/wallet/holdings/history" \
   -H "Content-Type: application/json" \
   -H "X-API-KEY: $API_KEY" \
-  -d '{"addresses": [{"address": "0x...", "chain": "ethereum"}], "start_timestamp": "1773259200", "end_timestamp": "1773273600", "granularity": "1h"}'
+  -d '{"addresses": [{"address": "0x...", "chain": "ethereum"}], "start_timestamp": "2026-03-11T20:00:00Z", "end_timestamp": "2026-03-12T00:00:00Z", "granularity": "1h"}'
 ```
 
 | Field | Required | Notes |
 |---|---|---|
 | `addresses` | Yes | Array of `{address, chain}` objects |
-| `start_timestamp` | Yes | Unix seconds or ISO 8601 string |
-| `end_timestamp` | Yes | Unix seconds or ISO 8601 string |
+| `start_timestamp` | Yes | ISO 8601 string |
+| `end_timestamp` | Yes | ISO 8601 string |
 | `granularity` | Yes | `15s`, `1m`, `5m`, `1h`, `1d` |
 
 **Response:**
@@ -735,9 +735,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl/history" \
 | Field              | Required | Notes                                     |
 | ------------------ | -------- | ----------------------------------------- |
 | `addresses`        | Yes      | Array of `{address, chain}` objects       |
-| `start_timestamp`  | Yes      | Unix seconds or ISO 8601 string           |
-| `end_timestamp`    | Yes      | Unix seconds or ISO 8601 string           |
-| `granularity`      | Yes      | `15s`, `1m`, `5m`, `1h`, `1d`             |
+| `start_timestamp`  | Yes      | ISO 8601 string |
+| `end_timestamp`    | Yes      | ISO 8601 string |
+| `granularity`      | Yes      | `15s`, `1m`, `5m`, `1h`, `1d`               |
 
 **Response:**
 
@@ -1249,17 +1249,12 @@ Check JSON syntax — missing commas, unquoted keys, trailing commas.
 
 ## Timestamp Formats
 
-**In requests:** Both Unix seconds (integer) and ISO 8601 strings are accepted.
+> **AI agent guidance:** Always use ISO 8601 strings (e.g. `"2025-12-25T00:00:00Z"`).
+> Never compute Unix timestamps manually — LLMs routinely miscalculate them.
 
-| Format | Example | Works in |
-|---|---|---|
-| Unix seconds (integer) | `1706572800` | All timestamp fields |
-| Unix seconds (string) | `"1706572800"` | All timestamp fields |
-| ISO 8601 UTC | `"2024-01-30T00:00:00Z"` | All timestamp fields |
+**In requests:** Use ISO 8601 UTC strings (e.g. `"2024-01-30T00:00:00Z"`).
 
 **In responses:** Always ISO 8601 UTC format (`"2024-01-30T00:00:00Z"`).
-
-**Important:** Do not mix formats within a single request. Pick one and use it consistently for `start_timestamp` and `end_timestamp`.
 
 ---
 
