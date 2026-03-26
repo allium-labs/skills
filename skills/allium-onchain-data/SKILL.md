@@ -87,18 +87,9 @@ curl -X POST "https://api.allium.so/api/v1/explorer/queries" \
 
 ---
 
-## Step 0: Check Supported Chains (REQUIRED)
+## Before Calling Developer Endpoints
 
-Call this **once per session** to know which chains each `/developer/` endpoint supports. Cache the result — it covers all endpoints. **Skip for Explorer SQL and Docs endpoints.**
-
-```bash
-curl "https://api.allium.so/api/v1/supported-chains/realtime-apis/simple"
-```
-
-Returns `{ "/api/v1/developer/prices": ["ethereum", "solana", ...], ... }` — a map of endpoint → supported chains. Use it to:
-
-- **Validate** the chain before calling. Wrong chain = silent empty result or error.
-- **Discover** which endpoints cover a chain the user asks about.
+Read `references/realtime/overview.md` first — it covers supported chains discovery, error codes, and common gotchas that apply across all realtime endpoints.
 
 ---
 
@@ -106,26 +97,27 @@ Returns `{ "/api/v1/developer/prices": ["ethereum", "solana", ...], ... }` — a
 
 Wrong choice wastes a call. Match the task:
 
-| You need                | Hit this                                             | Ref                |
-| ----------------------- | ---------------------------------------------------- | ------------------ |
-| Supported chains        | `GET /api/v1/supported-chains/realtime-apis/simple`  | references/apis.md |
-| Current price           | `POST /api/v1/developer/prices`                      | references/apis.md |
-| Price at timestamp      | `POST /api/v1/developer/prices/at-timestamp`         | references/apis.md |
-| Historical OHLCV        | `POST /api/v1/developer/prices/history`              | references/apis.md |
-| Token stats             | `POST /api/v1/developer/prices/stats`                | references/apis.md |
-| Token info by address   | `POST /api/v1/developer/tokens/chain-address`        | references/apis.md |
-| List tokens             | `GET /api/v1/developer/tokens`                       | references/apis.md |
-| Search tokens           | `GET /api/v1/developer/tokens/search`                | references/apis.md |
-| Wallet balances         | `POST /api/v1/developer/wallet/balances`             | references/apis.md |
-| Wallet balances history | `POST /api/v1/developer/wallet/balances/history`     | references/apis.md |
-| Wallet holdings history | `POST /api/v1/developer/wallet/holdings/history`     | references/apis.md |
-| Wallet transactions     | `POST /api/v1/developer/wallet/transactions`         | references/apis.md |
-| Wallet latest PnL       | `POST /api/v1/developer/wallet/pnl`                  | references/apis.md |
-| Wallet historical PnL   | `POST /api/v1/developer/wallet/pnl/history`          | references/apis.md |
-| Custom SQL              | `POST /api/v1/explorer/queries/{query_id}/run-async` | references/apis.md |
-| Browse docs             | `GET /api/v1/docs/docs/browse`                       | references/apis.md |
-| Search schemas          | `GET /api/v1/docs/schemas/search`                    | references/apis.md |
-| Browse schemas          | `GET /api/v1/docs/schemas/browse`                    | references/apis.md |
+| You need                | Hit this                                             | Ref                            |
+| ----------------------- | ---------------------------------------------------- | ------------------------------ |
+| Current price           | `POST /api/v1/developer/prices`                      | references/realtime/prices.md  |
+| Price at timestamp      | `POST /api/v1/developer/prices/at-timestamp`         | references/realtime/prices.md  |
+| Historical OHLCV        | `POST /api/v1/developer/prices/history`              | references/realtime/prices.md  |
+| Token stats             | `POST /api/v1/developer/prices/stats`                | references/realtime/prices.md  |
+| Token info by address   | `POST /api/v1/developer/tokens/chain-address`        | references/realtime/tokens.md  |
+| List tokens             | `GET /api/v1/developer/tokens`                       | references/realtime/tokens.md  |
+| Search tokens           | `GET /api/v1/developer/tokens/search`                | references/realtime/tokens.md  |
+| Wallet balances         | `POST /api/v1/developer/wallet/balances`             | references/realtime/wallets.md |
+| Wallet balances history | `POST /api/v1/developer/wallet/balances/history`     | references/realtime/wallets.md |
+| Wallet transactions     | `POST /api/v1/developer/wallet/transactions`         | references/realtime/wallets.md |
+| Wallet PnL              | `POST /api/v1/developer/wallet/pnl`                  | references/realtime/holdings.md |
+| Holdings history        | `POST /api/v1/developer/wallet/holdings/history`     | references/realtime/holdings.md |
+| PnL by token            | `POST /api/v1/developer/wallet/pnl-by-token`         | references/realtime/holdings.md |
+| Hyperliquid trading     | `POST /api/v1/developer/trading/hyperliquid/info`    | references/realtime/hyperliquid.md |
+| Assets                  | `GET /api/v1/developer/assets`                       | references/realtime/assets.md  |
+| Custom SQL              | `POST /api/v1/explorer/queries/{query_id}/run-async` | references/explorer/apis.md    |
+| Browse docs             | `GET /api/v1/docs/docs/browse`                       | references/docs/apis.md        |
+| Search schemas          | `GET /api/v1/docs/schemas/search`                    | references/docs/apis.md        |
+| Browse schemas          | `GET /api/v1/docs/schemas/browse`                    | references/docs/apis.md        |
 
 ---
 
@@ -176,6 +168,14 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
 
 ## References
 
-| File                          | When to read                                 |
-| ----------------------------- | -------------------------------------------- |
-| [apis.md](references/apis.md) | Response formats, all endpoints, error codes |
+| File                                                    | When to read                                      |
+| ------------------------------------------------------- | ------------------------------------------------- |
+| [realtime/overview.md](references/realtime/overview.md) | **Read first** — supported chains, errors, pagination, conventions, gotchas |
+| [realtime/prices.md](references/realtime/prices.md)     | Token prices (current, history, stats, timestamp) |
+| [realtime/tokens.md](references/realtime/tokens.md)     | Token lookup (list, search, by address)           |
+| [realtime/wallets.md](references/realtime/wallets.md)   | Wallet balances, history, transactions            |
+| [realtime/holdings.md](references/realtime/holdings.md) | Holdings history, PnL by wallet/token             |
+| [realtime/hyperliquid.md](references/realtime/hyperliquid.md) | Hyperliquid trading (info, fills, orders)   |
+| [realtime/assets.md](references/realtime/assets.md)     | Asset lookup (list, batch get)                    |
+| [docs/apis.md](references/docs/apis.md)                 | Browse docs, browse/search schemas                |
+| [explorer/apis.md](references/explorer/apis.md)         | Explorer SQL (create query, run, poll results)    |
