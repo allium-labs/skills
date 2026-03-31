@@ -378,6 +378,7 @@ Access: `items[0]["pnl"]` — note the nested `pnl` array.
 | `realtime balances history`      | $0.01         |
 | `realtime holdings history`      | $0.01         |
 | `realtime transactions`          | $0.03         |
+| `realtime positions`             | $0.01         |
 | `realtime pnl`                   | $0.01         |
 | `realtime pnl history`           | $0.01         |
 
