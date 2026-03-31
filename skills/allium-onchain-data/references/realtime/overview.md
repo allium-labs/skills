@@ -26,6 +26,7 @@ curl "https://api.allium.so/api/v1/supported-chains/realtime-apis/simple"
   "/api/v1/developer/wallet/balances/history": ["arbitrum", "base", "bitcoin", "ethereum", "solana", ...],
   "/api/v1/developer/wallet/transactions": ["abstract", "arbitrum", "ethereum", "solana", ...],
   "/api/v1/developer/wallet/holdings/history": ["arbitrum", "avalanche", "base", "bitcoin", "ethereum", "solana", ...],
+  "/api/v1/developer/wallet/positions": ["abstract", "arbitrum", "ethereum", "solana", ...],
   "/api/v1/developer/wallet/pnl": ["arbitrum", "avalanche", "base", "ethereum", "solana", ...],
   "/api/v1/developer/wallet/pnl/history": ["arbitrum", "avalanche", "base", "ethereum", "solana", ...],
   "/api/v1/developer/wallet/pnl-by-token": ["arbitrum", "avalanche", "base", "ethereum", "solana", ...],
@@ -65,6 +66,7 @@ Use this to validate chain support before making data calls. Chain coverage vari
 | `POST /developer/wallet/balances` | No | All results returned. Batch via multiple `chain`/`address` pairs in `addresses` request body field. | N/A |
 | `POST /developer/wallet/balances/history` | Yes | Paginated via `limit` + `cursor` query parameters | N/A |
 | `POST /developer/wallet/holdings/history` | No | All results returned. Batch via multiple `chain`/`address` pairs in `addresses` request body field. | N/A |
+| `POST /developer/wallet/positions` | Yes | Paginated via `limit` + `cursor` query parameters | N/A |
 | `POST /developer/wallet/transactions` | Yes | Paginated via `limit` + `cursor` query parameters | N/A |
 | `POST /developer/wallet/pnl` | No | All results returned. Batch via multiple `chain`/`address` pairs in `addresses` request body field. | N/A |
 | `POST /developer/wallet/pnl/history` | No | All results returned. Batch via multiple `chain`/`address` pairs in `addresses` request body field. | N/A |

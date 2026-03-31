@@ -176,6 +176,126 @@ Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs
 
 ---
 
+### Fetch DeFi Positions
+
+`POST /api/v1/developer/wallet/positions`
+
+Retrieve DeFi positions for a wallet across multiple protocols and chains
+
+#### Request
+
+**Body:**
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `chain` | string | Yes | Lowercase chain name |
+| `address` | string | Yes | Wallet address |
+
+**Query parameters:**
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `limit` | integer | No | Max number of positions returned. Default is 25. (default: `25`) |
+| `cursor` | string | No | Cursor to request the next page of results. |
+
+**Example:**
+
+```bash
+curl -X POST "https://api.allium.so/api/v1/developer/wallet/positions" \
+  -H "X-API-KEY: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[{"chain": "...", "address": "..."}]'
+```
+
+#### Response
+
+| Field | Type | Always present | Description |
+| ----- | ---- | -------------- | ----------- |
+| `items[].chain` | string | Yes | Lowercase chain name |
+| `items[].address` | string | Yes | Wallet address that holds this position |
+| `items[].position_id` | string | Yes | Unique identifier for the position |
+| `items[].protocol` | string | Yes | Protocol name (e.g. uniswap-v3, aave-v3) |
+| `items[].total_value_usd` | string or null | No | Total USD value of the position |
+| `items[].position_type` | string | No |  |
+| `items[].pool_address` | string | Yes | Pool contract address |
+| `items[].fee_tier` | string or null | No | Pool fee tier (e.g. 0.3%) |
+| `items[].in_range` | boolean or null | No | Whether the position is within the active price range |
+| `items[].token0` | object | Yes | First token in the pool pair |
+| `items[].token0.object` | string | No |  |
+| `items[].token0.chain` | string | Yes | Lowercase chain name |
+| `items[].token0.address` | string | Yes | Token contract address |
+| `items[].token0.type` | string or null | No | Token standard type: evm_erc20/evm_erc721/evm_erc1155 (EVMs), sol_spl (Solana), sui_token (Sui), near_nep141/near_nep245 (Near), stellar_classic/stellar_sac/stellar_wasm (Stellar), or native (All) |
+| `items[].token0.price` | number or null | No | Current price (USD) |
+| `items[].token0.decimals` | integer or null | No | Token decimal places |
+| `items[].token0.info` | object or null | No | Token name and symbol |
+| `items[].token0.info.name` | string | Yes | Token name |
+| `items[].token0.info.symbol` | string | Yes | Token symbol |
+| `items[].token0.attributes` | object or null | No | Token market attributes |
+| `items[].token0.attributes.total_liquidity_usd` | object or null | No | Liquidity data: {'amount': number} when available, or {'details': 'LIQUIDITY_TOO_HIGH'} when limit exceeded |
+| `items[].token0.attributes.price_diff_1d` | number or null | No | Price change (USD) over last 24h |
+| `items[].token0.attributes.price_diff_pct_1d` | number or null | No | Price change (%) over last 24h |
+| `items[].token0.attributes.price_diff_1h` | number or null | No | Price change (USD) over last 1h |
+| `items[].token0.attributes.price_diff_pct_1h` | number or null | No | Price change (%) over last 1h |
+| `items[].token0.attributes.total_supply` | number or null | No | Total token supply |
+| `items[].token0.attributes.fully_diluted_valuation_usd` | number or null | No | Fully diluted valuation (USD) |
+| `items[].token0.attributes.volume_1h` | number or null | No | Trading volume over last 1h |
+| `items[].token0.attributes.volume_1d` | number or null | No | Trading volume over last 24h |
+| `items[].token0.attributes.volume_usd_1h` | number or null | No | Trading volume (USD) over last 1h |
+| `items[].token0.attributes.volume_usd_1d` | number or null | No | Trading volume (USD) over last 24h |
+| `items[].token0.attributes.volume_24h` | number or null | No | Trading volume over last 24h |
+| `items[].token0.attributes.volume_usd_24h` | number or null | No | Trading volume (USD) over last 24h |
+| `items[].token0.attributes.trade_count_1h` | integer or null | No | Trade count over last 1h |
+| `items[].token0.attributes.trade_count_1d` | integer or null | No | Trade count over last 24h |
+| `items[].token0.attributes.all_time_high` | number or null | No | All-time high price (USD) |
+| `items[].token0.attributes.all_time_low` | number or null | No | All-time low price (USD) |
+| `items[].token0.attributes.image_url` | string or null | No | Token logo URL |
+| `items[].token0.attributes.token_creation_time` | string or null | No | Token creation timestamp (UTC) |
+| `items[].token0.attributes.holders_count` | integer or null | No | Number of token holders |
+| `items[].token0.attributes.stellar_fields` | object or null | No | Stellar-specific metadata |
+| `items[].token1` | object | Yes | Second token in the pool pair |
+| `items[].token1.object` | string | No |  |
+| `items[].token1.chain` | string | Yes | Lowercase chain name |
+| `items[].token1.address` | string | Yes | Token contract address |
+| `items[].token1.type` | string or null | No | Token standard type: evm_erc20/evm_erc721/evm_erc1155 (EVMs), sol_spl (Solana), sui_token (Sui), near_nep141/near_nep245 (Near), stellar_classic/stellar_sac/stellar_wasm (Stellar), or native (All) |
+| `items[].token1.price` | number or null | No | Current price (USD) |
+| `items[].token1.decimals` | integer or null | No | Token decimal places |
+| `items[].token1.info` | object or null | No | Token name and symbol |
+| `items[].token1.info.name` | string | Yes | Token name |
+| `items[].token1.info.symbol` | string | Yes | Token symbol |
+| `items[].token1.attributes` | object or null | No | Token market attributes |
+| `items[].token1.attributes.total_liquidity_usd` | object or null | No | Liquidity data: {'amount': number} when available, or {'details': 'LIQUIDITY_TOO_HIGH'} when limit exceeded |
+| `items[].token1.attributes.price_diff_1d` | number or null | No | Price change (USD) over last 24h |
+| `items[].token1.attributes.price_diff_pct_1d` | number or null | No | Price change (%) over last 24h |
+| `items[].token1.attributes.price_diff_1h` | number or null | No | Price change (USD) over last 1h |
+| `items[].token1.attributes.price_diff_pct_1h` | number or null | No | Price change (%) over last 1h |
+| `items[].token1.attributes.total_supply` | number or null | No | Total token supply |
+| `items[].token1.attributes.fully_diluted_valuation_usd` | number or null | No | Fully diluted valuation (USD) |
+| `items[].token1.attributes.volume_1h` | number or null | No | Trading volume over last 1h |
+| `items[].token1.attributes.volume_1d` | number or null | No | Trading volume over last 24h |
+| `items[].token1.attributes.volume_usd_1h` | number or null | No | Trading volume (USD) over last 1h |
+| `items[].token1.attributes.volume_usd_1d` | number or null | No | Trading volume (USD) over last 24h |
+| `items[].token1.attributes.volume_24h` | number or null | No | Trading volume over last 24h |
+| `items[].token1.attributes.volume_usd_24h` | number or null | No | Trading volume (USD) over last 24h |
+| `items[].token1.attributes.trade_count_1h` | integer or null | No | Trade count over last 1h |
+| `items[].token1.attributes.trade_count_1d` | integer or null | No | Trade count over last 24h |
+| `items[].token1.attributes.all_time_high` | number or null | No | All-time high price (USD) |
+| `items[].token1.attributes.all_time_low` | number or null | No | All-time low price (USD) |
+| `items[].token1.attributes.image_url` | string or null | No | Token logo URL |
+| `items[].token1.attributes.token_creation_time` | string or null | No | Token creation timestamp (UTC) |
+| `items[].token1.attributes.holders_count` | integer or null | No | Number of token holders |
+| `items[].token1.attributes.stellar_fields` | object or null | No | Stellar-specific metadata |
+| `items[].token0_amount` | string | Yes | Amount of token0 in the position (human-readable decimal string) |
+| `items[].token1_amount` | string | Yes | Amount of token1 in the position (human-readable decimal string) |
+| `items[].token0_amount_usd` | string or null | No | USD value of token0 amount |
+| `items[].token1_amount_usd` | string or null | No | USD value of token1 amount |
+| `items[].unclaimed_fees_token0` | string or null | No | Unclaimed fee amount in token0 |
+| `items[].unclaimed_fees_token1` | string or null | No | Unclaimed fee amount in token1 |
+| `items[].unclaimed_fees_usd` | string or null | No | Total unclaimed fees in USD |
+
+Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/defi-positions/get-positions.md`
+
+---
+
 ### Fetch transactions
 
 `POST /api/v1/developer/wallet/transactions`
@@ -188,8 +308,8 @@ Get rich transaction activity data for wallets, including activities, asset tran
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
-| `chain` | string | Yes |  |
-| `address` | string | Yes |  |
+| `chain` | string | Yes | Lowercase chain name |
+| `address` | string | Yes | Wallet address |
 
 **Query parameters:**
 

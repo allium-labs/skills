@@ -34,8 +34,8 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices" \
   -H "Content-Type: application/json" \
   -d '[
     {
-      "chain": "string",
-      "token_address": "string"
+      "chain": "ethereum",
+      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     }
   ]'
 ```
@@ -121,8 +121,8 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/stats" \
   -H "Content-Type: application/json" \
   -d '[
     {
-      "chain": "string",
-      "token_address": "string"
+      "chain": "ethereum",
+      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     }
   ]'
 ```

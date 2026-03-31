@@ -22,13 +22,13 @@ Get historical aggregated USD holdings for an address.
 | `granularity` | string | Yes | Time interval granularity (15s, 1m, 5m, 1h, 1d) |
 | `addresses` | array of objects | Yes | List of wallet chain+address pairs |
 | `include_token_breakdown` | boolean | No | If true, includes per-token breakdown in each interval (default: `False`) |
-| `min_liquidity` | number or null | No | Minimum USD liquidity threshold to include a token |
 
 **Query parameters:**
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
 | `cursor` | string | No | cursor |
+| `min_liquidity` | number | No | Minimum USD liquidity threshold to include a token |
 
 **Example:**
 
@@ -46,7 +46,6 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/holdings/history" \
     "end_timestamp": "2025-04-10T00:00:00Z",
     "granularity": "1h",
     "include_token_breakdown": false,
-    "min_liquidity": 5000,
     "start_timestamp": "2025-04-01T00:00:00Z"
   }'
 ```
@@ -101,12 +100,7 @@ Get the PnL for a given wallet address.
 curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl" \
   -H "X-API-KEY: $API_KEY" \
   -H "Content-Type: application/json" \
-  -d '[
-    {
-      "chain": "solana",
-      "address": "125Z6k4ZAxsgdG7JxrKZpwbcS1rxqpAeqM9GSCKd66Wp"
-    }
-  ]'
+  -d '[{"chain": "...", "address": "..."}]'
 ```
 
 #### Response
