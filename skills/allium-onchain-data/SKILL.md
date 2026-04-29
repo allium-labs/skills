@@ -4,6 +4,14 @@ description: >-
   Query blockchain data via Allium APIs. Token prices, wallet balances,
   transactions, historical data. Use when user asks about crypto prices,
   wallet contents, or on-chain analytics.
+scope_in: >-
+  Onchain data and analytics across 70+ chains via Allium APIs — token prices (current,
+  historical, OHLCV), wallet balances, transaction history, holdings, PnL, and custom SQL
+  analytics on Allium's data warehouse.
+scope_out: >-
+  Pay-per-call keyless access to Allium → `allium-x402`.
+  Keyless access to Alchemy infrastructure for autonomous agents → `alchemy-agentic-gateway`.
+  Building app code on Alchemy infrastructure (RPC, webhooks, Account Kit, simulation) → `alchemy-api`.
 ---
 
 # Allium Blockchain Data

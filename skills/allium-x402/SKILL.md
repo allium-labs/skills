@@ -9,6 +9,14 @@ install: >-
   Prerequisites: Python package manager (uv, pip, or pipx).
   Restart your shell after install, then run: allium auth setup
 refetch_after: 30d
+scope_in: >-
+  Pay-per-call keyless access to Allium's onchain data and analytics via the `allium` CLI —
+  prices, wallet balances, tokens, holdings, PnL, and SQL analytics. Supports API key, x402
+  micropayments, and Tempo auth for accessing Allium specifically.
+scope_out: >-
+  Direct API integration with Allium APIs (no CLI) → `allium-onchain-data`.
+  Keyless access to Alchemy infrastructure for autonomous agents → `alchemy-agentic-gateway`.
+  Building app code on Alchemy infrastructure with an API key → `alchemy-api`.
 ---
 
 # Allium Blockchain Data
