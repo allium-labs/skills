@@ -1,7 +1,6 @@
-# Tokens API Reference
+# Tokens Reference
 
-**Base URL:** `https://api.allium.so`
-**Auth:** `X-API-KEY` header
+All commands output JSON by default. Use `--format table` for human-readable output or `--format csv` for spreadsheets.
 
 ---
 
@@ -13,23 +12,24 @@ List tokens, optionally sorted by a field.
 
 #### Request
 
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `chain` | string | No | The chain of the tokens. Do not pass anything to search across all tokens. |
-| `sort` | string | No | Sort by a certain field. One of: volume, trade_count, fully_diluted_valuation, address, name (default: `volume`) |
-| `granularity` | string or null | No | Granularity of the sorting field. Only used if sort is volume or trade_count. |
-| `order` | string | No | Sorting order. One of: asc, desc (default: `desc`) |
-| `limit` | integer | No | Maximum number of tokens to return. (default: `200`) |
-| `volume_usd_1d_threshold` | number | No | Minimum 1d volume in USD. Only returns tokens with volume >= this value. |
-| `volume_usd_1h_threshold` | number | No | Minimum 1h volume in USD. Only returns tokens with volume >= this value. |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--chain` | string | No | The chain of the tokens. Do not pass anything to search across all tokens. |
+| `--sort` | string | No | Sort by a certain field. One of: volume, trade_count, fully_diluted_valuation, address, name (default: `volume`) |
+| `--granularity` | string or null | No | Granularity of the sorting field. Only used if sort is volume or trade_count. |
+| `--order` | string | No | Sorting order. One of: asc, desc (default: `desc`) |
+| `--limit` | integer | No | Maximum number of tokens to return. (default: `200`) |
+| `--volume-usd-1d-threshold` | number | No | Minimum 1d volume in USD. Only returns tokens with volume >= this value. |
+| `--volume-usd-1h-threshold` | number | No | Minimum 1h volume in USD. Only returns tokens with volume >= this value. |
 
 **Example:**
 
 ```bash
-curl -X GET "https://api.allium.so/api/v1/developer/tokens" \
-  -H "X-API-KEY: $API_KEY"
+allium realtime tokens list \
+  --chain ethereum \
+  --sort volume \
+  --order desc \
+  --limit 20
 ```
 
 #### Response
@@ -70,7 +70,9 @@ curl -X GET "https://api.allium.so/api/v1/developer/tokens" \
 | `[].attributes.holders_count` | integer or null | No | Number of token holders |
 | `[].attributes.stellar_fields` | object or null | No | Stellar-specific metadata |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/tokens/list-tokens.md`
+> Access: `[0]` — returns a raw array (no wrapper).
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/tokens/list-tokens.md`
 
 ---
 
@@ -82,24 +84,21 @@ Search tokens with a query string.
 
 #### Request
 
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `q` | string | Yes | The query string to search in name and symbol. Performs a case-insensitive substring search. |
-| `chain` | string | No | The chain of the tokens. Do not pass anything to search across all tokens. |
-| `sort` | string | No | Sort by a certain field. One of: volume, trade_count, fully_diluted_valuation, address, name (default: `volume`) |
-| `granularity` | string or null | No | Granularity of the sorting field. Only used if sort is volume or trade_count. |
-| `order` | string | No | Sorting order. One of: asc, desc (default: `desc`) |
-| `limit` | integer | No | Maximum number of tokens to return. (default: `200`) |
-| `volume_usd_1d_threshold` | number | No | Minimum 1d volume in USD. Only returns tokens with volume >= this value. |
-| `volume_usd_1h_threshold` | number | No | Minimum 1h volume in USD. Only returns tokens with volume >= this value. |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `-q` | string | Yes | The query string to search in name and symbol. Performs a case-insensitive substring search. |
+| `--chain` | string | No | The chain of the tokens. Do not pass anything to search across all tokens. |
+| `--sort` | string | No | Sort by a certain field. One of: volume, trade_count, fully_diluted_valuation, address, name (default: `volume`) |
+| `--granularity` | string or null | No | Granularity of the sorting field. Only used if sort is volume or trade_count. |
+| `--order` | string | No | Sorting order. One of: asc, desc (default: `desc`) |
+| `--limit` | integer | No | Maximum number of tokens to return. (default: `200`) |
+| `--volume-usd-1d-threshold` | number | No | Minimum 1d volume in USD. Only returns tokens with volume >= this value. |
+| `--volume-usd-1h-threshold` | number | No | Minimum 1h volume in USD. Only returns tokens with volume >= this value. |
 
 **Example:**
 
 ```bash
-curl -X GET "https://api.allium.so/api/v1/developer/tokens/search?q=..." \
-  -H "X-API-KEY: $API_KEY"
+allium realtime tokens search -q bitcoin --limit 10
 ```
 
 #### Response
@@ -140,7 +139,9 @@ curl -X GET "https://api.allium.so/api/v1/developer/tokens/search?q=..." \
 | `[].attributes.holders_count` | integer or null | No | Number of token holders |
 | `[].attributes.stellar_fields` | object or null | No | Stellar-specific metadata |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/tokens/search-tokens.md`
+> Access: `[0]` — returns a raw array (no wrapper).
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/tokens/search-tokens.md`
 
 ---
 
@@ -152,25 +153,17 @@ Get token details for the given token addresses and chains.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `token_address` | string | Yes | Token contract address |
-| `chain` | string | Yes | Lowercase chain name |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--token-address` | string | Yes | Token contract address (repeatable) |
+| `--chain` | string | Yes | Lowercase chain name (repeatable) |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/tokens/chain-address" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[
-    {
-      "chain": "ethereum",
-      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-    }
-  ]'
+allium realtime tokens chain-address \
+  --chain ethereum \
+  --token-address 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 ```
 
 #### Response
@@ -211,4 +204,6 @@ curl -X POST "https://api.allium.so/api/v1/developer/tokens/chain-address" \
 | `[].attributes.holders_count` | integer or null | No | Number of token holders |
 | `[].attributes.stellar_fields` | object or null | No | Stellar-specific metadata |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/tokens/get-tokens-by-chain-address.md`
+> Access: `[0]` — returns a raw array (no wrapper).
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/tokens/get-tokens-by-chain-address.md`

@@ -11,8 +11,7 @@ scope_in: >-
   and per-request payments (x402 or MPP). Use when an Alchemy API key is intentionally not in
   use — autonomous agents paying per request, or explicit x402/MPP preference.
 scope_out: >-
-  Onchain data, prices, balances, PnL, and custom SQL analytics → `allium-onchain-data`.
-  Pay-per-call keyless access to Allium → `allium-x402`.
+  Onchain data, prices, balances, PnL, and custom SQL analytics via the `allium` CLI (API key, x402, or Tempo auth) → `allium-data`.
   Standard Alchemy app integration with an API key → `alchemy-api`.
 ---
 # Alchemy Agentic Gateway (x402 / MPP)

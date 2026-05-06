@@ -1,7 +1,6 @@
-# Holdings API Reference
+# Holdings Reference
 
-**Base URL:** `https://api.allium.so`
-**Auth:** `X-API-KEY` header
+All commands output JSON by default. Use `--format table` for human-readable output or `--format csv` for spreadsheets.
 
 ---
 
@@ -13,41 +12,25 @@ Get historical aggregated USD holdings for an address.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `start_timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
-| `end_timestamp` | string | Yes | End of time range (UTC ISO 8601) |
-| `granularity` | string | Yes | Time interval granularity (15s, 1m, 5m, 1h, 1d) |
-| `addresses` | array of objects | Yes | List of wallet chain+address pairs |
-| `include_token_breakdown` | boolean | No | If true, includes per-token breakdown in each interval (default: `False`) |
-
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `cursor` | string | No | cursor |
-| `min_liquidity` | number | No | Minimum USD liquidity threshold to include a token |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--start-timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
+| `--end-timestamp` | string | Yes | End of time range (UTC ISO 8601) |
+| `--granularity` | string | Yes | Time interval granularity (15s, 1m, 5m, 1h, 1d) |
+| `--addresses` | array of objects | Yes | List of wallet chain+address pairs |
+| `--include-token-breakdown` | boolean | No | If true, includes per-token breakdown in each interval (default: `False`) |
+| `--min-liquidity` | number or null | No | Minimum USD liquidity threshold to include a token |
+| `--cursor` | string | No | cursor |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/wallet/holdings/history" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "addresses": [
-      {
-        "address": "125Z6k4ZAxsgdG7JxrKZpwbcS1rxqpAeqM9GSCKd66Wp",
-        "chain": "solana"
-      }
-    ],
-    "end_timestamp": "2025-04-10T00:00:00Z",
-    "granularity": "1h",
-    "include_token_breakdown": false,
-    "start_timestamp": "2025-04-01T00:00:00Z"
-  }'
+allium realtime holdings history \
+  --chain ethereum \
+  --address 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --granularity 1d
 ```
 
 #### Response
@@ -69,7 +52,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/holdings/history" \
 | `items[].token_breakdown[].liquidity.amount` | number or null | No | Liquidity amount (USD) |
 | `items[].token_breakdown[].liquidity.details` | string or null | No | Status when amount unavailable (e.g. LIQUIDITY_TOO_HIGH) |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-history.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-history.md`
 
 ---
 
@@ -81,26 +66,18 @@ Get the PnL for a given wallet address.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `chain` | string | Yes | Lowercase chain name |
-| `address` | string | Yes | Wallet address |
-
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `min_liquidity` | number | No | Minimum liquidity of which tokens must have to be included in the response. |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--chain` | string | Yes | Lowercase chain name (repeatable) |
+| `--address` | string | Yes | Wallet address (repeatable) |
+| `--min-liquidity` | number | No | Minimum liquidity of which tokens must have to be included in the response. |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[{"chain": "...", "address": "..."}]'
+allium realtime pnl latest \
+  --chain ethereum \
+  --address 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 ```
 
 #### Response
@@ -223,7 +200,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl" \
 }
 ```
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl.md`
 
 ---
 
@@ -235,38 +214,23 @@ Get the Historical PnL for a given wallet address.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `start_timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
-| `end_timestamp` | string | Yes | End of time range (UTC ISO 8601) |
-| `granularity` | string | Yes | Time interval granularity (1d, 1h, 5m, 1m, 15s) |
-| `addresses` | array of objects | Yes | List of wallet chain+address pairs |
-
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `min_liquidity` | number | No | Minimum liquidity of which tokens must have to be included in the response. |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--start-timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
+| `--end-timestamp` | string | Yes | End of time range (UTC ISO 8601) |
+| `--granularity` | string | Yes | Time interval granularity (1d, 1h, 5m, 1m, 15s) |
+| `--addresses` | array of objects | Yes | List of wallet chain+address pairs |
+| `--min-liquidity` | number | No | Minimum liquidity of which tokens must have to be included in the response. |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl/history" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "addresses": [
-      {
-        "address": "125Z6k4ZAxsgdG7JxrKZpwbcS1rxqpAeqM9GSCKd66Wp",
-        "chain": "solana"
-      }
-    ],
-    "end_timestamp": "2025-04-10T00:00:00Z",
-    "granularity": "1h",
-    "start_timestamp": "2025-04-01T00:00:00Z"
-  }'
+allium realtime pnl history \
+  --chain ethereum \
+  --address 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --granularity 1d
 ```
 
 #### Response
@@ -321,7 +285,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl/history" \
 }
 ```
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-history.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-history.md`
 
 ---
 
@@ -333,21 +299,19 @@ Get the PnL for a given wallet and token address.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `chain` | string | Yes | Lowercase chain name |
-| `address` | string | Yes | Wallet address |
-| `token_address` | string | Yes | Token contract address |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--chain` | string | Yes | Lowercase chain name (repeatable) |
+| `--address` | string | Yes | Wallet address (repeatable) |
+| `--token-address` | string | Yes | Token contract address (repeatable) |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl-by-token" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[{"chain": "...", "address": "...", "token_address": "..."}]'
+allium realtime pnl latest \
+  --chain ethereum \
+  --address 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 \
+  --token-address 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 ```
 
 #### Response
@@ -411,7 +375,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl-by-token" \
 | `items[].historical_breakdown[].realized_pnl.currency` | string | No | Currency code |
 | `items[].historical_breakdown[].realized_pnl.amount` | string | Yes | Value in the specified currency |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-by-token.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-by-token.md`
 
 ---
 
@@ -423,33 +389,23 @@ Get the Historical PnL for a given wallet address and token address.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `start_timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
-| `end_timestamp` | string | Yes | End of time range (UTC ISO 8601) |
-| `granularity` | string | Yes | Time interval granularity (1d, 1h, 5m, 1m, 15s) |
-| `addresses` | array of objects | Yes | List of wallet chain+address+token triples |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--start-timestamp` | string | Yes | Start of time range (UTC ISO 8601) |
+| `--end-timestamp` | string | Yes | End of time range (UTC ISO 8601) |
+| `--granularity` | string | Yes | Time interval granularity (1d, 1h, 5m, 1m, 15s) |
+| `--addresses` | array of objects | Yes | List of wallet chain+address+token triples |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl-by-token/history" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "addresses": [
-      {
-        "address": "125Z6k4ZAxsgdG7JxrKZpwbcS1rxqpAeqM9GSCKd66Wp",
-        "chain": "solana",
-        "token_address": "So11111111111111111111111111111111111111112"
-      }
-    ],
-    "end_timestamp": "2025-04-10T00:00:00Z",
-    "granularity": "1h",
-    "start_timestamp": "2025-04-01T00:00:00Z"
-  }'
+allium realtime pnl history \
+  --chain ethereum \
+  --address 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 \
+  --token-address 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 \
+  --start-timestamp 2026-03-01T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --granularity 1d
 ```
 
 #### Response
@@ -468,4 +424,6 @@ curl -X POST "https://api.allium.so/api/v1/developer/wallet/pnl-by-token/history
 | `items[].pnl[].realized_pnl.currency` | string | No | Currency code |
 | `items[].pnl[].realized_pnl.amount` | string | Yes | Value in the specified currency |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-by-token-history.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/holdings/holdings-pnl-by-token-history.md`
