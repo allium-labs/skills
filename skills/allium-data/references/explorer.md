@@ -1,52 +1,33 @@
----
-name: allium-x402-explorer
-description: >-
-  Run SQL queries on historical blockchain data across 150+ chains.
-  Use for long-term analysis, cross-chain metrics, custom aggregations.
-  Ad-hoc SQL requires x402 or Tempo auth; saved queries work with any auth.
-refetch_after: 30d
----
+# Explorer (SQL Analytics)
 
-# Allium Explorer (SQL Analytics)
-
-Use Explorer when the user needs **historical analysis, cross-chain comparisons, or custom aggregations** — anything that requires SQL. Think analytical warehouse queries: powerful, flexible, not realtime.
-
-**When to use Explorer vs Realtime:**
-
-| Explorer (this skill)                                    | Realtime (x402-developer.md)                    |
-| -------------------------------------------------------- | ------------------------------------------------ |
-| "How did gas prices trend over the last 6 months?"       | "What's the current gas price on Ethereum?"      |
-| "Top 10 wallets by volume on Arbitrum last quarter"      | "Show my wallet balance"                         |
-| "Compare daily active addresses across all L2s"          | "What's ETH worth right now?"                    |
-| "Find all transfers over $1M on Base this week"          | "Get recent transactions for this wallet"        |
-| Custom SQL, any table, any timeframe                     | Fast indexed lookups, latest state               |
+Use Explorer when the user needs **historical analysis, cross-chain comparisons, or custom aggregations** — anything that requires SQL.
 
 ---
 
 ## Auth Requirements
 
-| Command                 | API Key | x402 | Tempo |
-| ----------------------- | ------- | ---- | ----- |
-| `explorer run`          | Yes     | Yes  | Yes   |
-| `explorer status`       | Yes     | Yes  | Yes   |
-| `explorer results`      | Yes     | Yes  | Yes   |
-| `explorer run-sql`      | No      | Yes  | Yes   |
+| Command              | API Key | x402 | Tempo |
+| -------------------- | ------- | ---- | ----- |
+| `explorer run`       | Yes     | Yes  | Yes   |
+| `explorer status`    | Yes     | Yes  | Yes   |
+| `explorer results`   | Yes     | Yes  | Yes   |
+| `explorer run-sql`   | No      | Yes  | Yes   |
 
 **Ad-hoc SQL (`run-sql`) requires machine payment auth** (x402 or Tempo). If the active profile is `api_key`, use saved queries via `explorer run` instead.
 
-Check the active profile with `allium auth list`.
+Check the active profile: `allium auth list`.
 
 ---
 
 ## Schema Discovery
 
-Before writing SQL, discover available tables and columns. Fetch the documentation index:
+Before writing SQL, discover available tables and columns:
 
 ```bash
 curl -s https://docs.allium.so/llms.txt
 ```
 
-This returns a complete listing of all Allium documentation pages. Use it to find table schemas, column names, and supported chains. **Never guess table or column names.**
+This returns a listing of all Allium documentation pages. Use it to find table schemas, column names, and supported chains. Never guess table or column names.
 
 SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.{schema}.{table}`.
 
@@ -56,7 +37,7 @@ SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.
 
 The CLI handles the async poll loop internally — submit SQL and get results in one step.
 
-**Important**: Don't use `--format table` as an agent unless the user specifically requests it. Otherwise, you'll be dealing with truncated responses and need to rerun queries.
+Don't use `--format table` as an agent — output gets truncated.
 
 **Inline SQL:**
 
@@ -125,7 +106,7 @@ allium explorer results <RUN_ID>
 
 ## Response Format
 
-Results default to JSON. Use `--format table` or `--format csv` globally.
+Results default to JSON:
 
 ```json
 {
@@ -150,17 +131,6 @@ Access: `data` for rows, `meta.columns` for schema.
 
 ---
 
-## Endpoint Costs
-
-| Command              | Cost per call                                        |
-| -------------------- | ---------------------------------------------------- |
-| `explorer run-sql`   | $0.01                                                |
-| `explorer run`       | $0.01                                                |
-| `explorer status`    | $0.01                                                |
-| `explorer results`   | ~$0.15/min of execution time (varies with complexity) |
-
----
-
 ## Query Status Values
 
 | Status     | Meaning              |
@@ -170,6 +140,17 @@ Access: `data` for rows, `meta.columns` for schema.
 | `success`  | Results ready        |
 | `failed`   | SQL error or timeout |
 | `canceled` | Manually stopped     |
+
+---
+
+## Costs
+
+| Command              | Cost per call                                        |
+| -------------------- | ---------------------------------------------------- |
+| `explorer run-sql`   | $0.01                                                |
+| `explorer run`       | $0.01                                                |
+| `explorer status`    | $0.01                                                |
+| `explorer results`   | ~$0.15/min of execution time (varies with complexity) |
 
 ---
 

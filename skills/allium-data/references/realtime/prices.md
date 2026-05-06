@@ -1,7 +1,6 @@
-# Prices API Reference
+# Prices Reference
 
-**Base URL:** `https://api.allium.so`
-**Auth:** `X-API-KEY` header
+All commands output JSON by default. Use `--format table` for human-readable output or `--format csv` for spreadsheets.
 
 ---
 
@@ -13,31 +12,18 @@ Get the latest price for the given token addresses and chains.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `token_address` | string | Yes | Token contract address |
-| `chain` | string | Yes | Lowercase chain name |
-
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `with_liquidity_info` | boolean | No | If true, returns total_liquidity_usd as well. See this page for more details. (default: `False`) |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--token-address` | string | Yes | Token contract address (repeatable) |
+| `--chain` | string | Yes | Lowercase chain name (repeatable) |
+| `--with-liquidity-info` | boolean | No | If true, returns total_liquidity_usd as well. See this page for more details. (default: `False`) |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/prices" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[
-    {
-      "chain": "ethereum",
-      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-    }
-  ]'
+allium realtime prices latest \
+  --chain ethereum \
+  --token-address 0x0000000000000000000000000000000000000000
 ```
 
 #### Response
@@ -54,7 +40,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices" \
 | `items[].close` | number | Yes | Closing price (USD) at the end of the interval |
 | `items[].low` | number | Yes | Lowest price (USD) during the interval |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-latest-price.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-latest-price.md`
 
 ---
 
@@ -66,17 +54,19 @@ Get the price history for the given token and the given time granularity.
 
 #### Request
 
-**Query parameters:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `cursor` | string | No | cursor |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--cursor` | string | No | cursor |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
-  -H "X-API-KEY: $API_KEY"
+allium realtime prices history \
+  --chain ethereum \
+  --token-address 0x0000000000000000000000000000000000000000 \
+  --start-timestamp 2026-03-10T00:00:00Z \
+  --end-timestamp 2026-03-17T00:00:00Z \
+  --time-granularity 1h
 ```
 
 #### Response
@@ -94,7 +84,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/history" \
 | `items[].prices[].close` | number | Yes | Closing price (USD) at the end of the interval |
 | `items[].prices[].low` | number | Yes | Lowest price (USD) during the interval |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-history.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-history.md`
 
 ---
 
@@ -106,25 +98,17 @@ Get tokens price stats like volume, high and low, price and volume change.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `token_address` | string | Yes | Token contract address |
-| `chain` | string | Yes | Lowercase chain name |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--token-address` | string | Yes | Token contract address (repeatable) |
+| `--chain` | string | Yes | Lowercase chain name (repeatable) |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/prices/stats" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[
-    {
-      "chain": "ethereum",
-      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-    }
-  ]'
+allium realtime prices stats \
+  --chain ethereum \
+  --token-address 0x0000000000000000000000000000000000000000
 ```
 
 #### Response
@@ -143,7 +127,9 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/stats" \
 | `items[].percent_change_1h` | number or null | No | Price change (%) over last 1h |
 | `items[].decimals` | integer or null | No | Token decimal places |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-stats.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-stats.md`
 
 ---
 
@@ -155,36 +141,21 @@ Price of a token at a given timestamp.
 
 #### Request
 
-**Body:**
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `addresses` | array of objects | Yes | List of token address+chain pairs |
-| `timestamp` | string | Yes | Target timestamp (UTC ISO 8601) |
-| `time_granularity` | string | Yes | Candle granularity (15s, 1m, 5m, 1h, 1d) |
-| `staleness_tolerance` | string or null | No | Max lookback for price data (e.g. 1h, 30m) |
+| Flag | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `--addresses` | array of objects | Yes | List of token address+chain pairs |
+| `--timestamp` | string | Yes | Target timestamp (UTC ISO 8601) |
+| `--time-granularity` | string | Yes | Candle granularity (15s, 1m, 5m, 1h, 1d) |
+| `--staleness-tolerance` | string or null | No | Max lookback for price data (e.g. 1h, 30m) |
 
 **Example:**
 
 ```bash
-curl -X POST "https://api.allium.so/api/v1/developer/prices/at-timestamp" \
-  -H "X-API-KEY: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "addresses": [
-      {
-        "chain": "string",
-        "token_address": "string"
-      },
-      {
-        "chain": "string",
-        "token_address": "string"
-      }
-    ],
-    "staleness_tolerance": "1h",
-    "time_granularity": "5m",
-    "timestamp": "2025-03-07T00:00:00Z"
-  }'
+allium realtime prices at-timestamp \
+  --chain ethereum \
+  --token-address 0x0000000000000000000000000000000000000000 \
+  --timestamp 2026-01-15T12:00:00Z \
+  --time-granularity 1h
 ```
 
 #### Response
@@ -197,4 +168,6 @@ curl -X POST "https://api.allium.so/api/v1/developer/prices/at-timestamp" \
 | `items[].chain` | string | Yes | Lowercase chain name |
 | `items[].price` | number | Yes | Price (USD) at the actual price timestamp |
 
-Detailed docs (supported chains, edge cases, response format): `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-at-timestamp.md`
+> Access: `items[]` for the result items.
+
+Detailed docs: `GET /api/v1/docs/docs/browse?path=api/developer/prices/token-price-at-timestamp.md`

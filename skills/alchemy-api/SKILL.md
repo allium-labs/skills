@@ -12,8 +12,7 @@ scope_in: >-
   transaction simulation, Solana RPC/DAS/Yellowstone gRPC, and Sui gRPC.
 scope_out: >-
   Pay-per-call keyless access to Alchemy without an API key → `alchemy-agentic-gateway`.
-  Onchain data analytics, prices, balances, PnL, and custom SQL → `allium-onchain-data`.
-  Pay-per-call keyless access to Allium → `allium-x402`.
+  Onchain data analytics, prices, balances, PnL, and custom SQL via the `allium` CLI (API key, x402, or Tempo auth) → `allium-data`.
 ---
 # Alchemy API (with API Key)
 
