@@ -1,12 +1,13 @@
 ---
 name: allium-data
 description: >-
-  Query blockchain data using the allium CLI. Token prices, wallet balances,
-  transactions, PnL, historical holdings, and SQL analytics across 80+ chains.
-  Supports API key, x402 micropayments, and Tempo auth. Use when user asks
-  about crypto prices, wallet balances, on-chain analytics, or blockchain data.
-  Always use this skill for any Allium data queries, blockchain lookups, or
-  on-chain analysis tasks.
+  Query blockchain data using the allium CLI. Two products: Explorer (SQL
+  analytics on Allium's data warehouse — any table, any timeframe, 150+ chains)
+  and Realtime (3-5s freshness lookups for prices, balances, transactions, PnL,
+  positions across 80+ chains). Supports API key, x402 micropayments, and
+  Tempo auth. Use when user asks about crypto prices, wallet balances,
+  on-chain analytics, blockchain data, custom SQL on chain data, or any
+  cross-chain comparison. Always use this skill for any Allium data queries.
 install: >-
   curl -sSL http://agents.allium.so/cli/install.sh | sh
   Prerequisites: Python package manager (uv, pip, or pipx).
@@ -32,9 +33,27 @@ Run `command -v allium` (or `allium --help`). If missing, read `references/setup
 
 ---
 
+## Two Products
+
+The CLI exposes **Explorer** (SQL analytics on Allium's full data warehouse) and **Realtime** (3-5s freshness lookups). Both are first-class — pick by the question.
+
+| Explorer (`allium explorer ...`)                    | Realtime (`allium realtime ...`)              |
+| --------------------------------------------------- | --------------------------------------------- |
+| "How did ETH perform over the last year?"           | "What's ETH worth right now?"                 |
+| "What's the total value locked across all chains?"  | "Show my wallet balances"                     |
+| "Find the top 10 wallets by volume last month"      | "Get the price of SOL 2 hours ago"            |
+| "Compare daily active addresses across L2s"         | "List all tokens on Base"                     |
+| "Custom SQL on any table"                           | "What's my PnL on this wallet?"               |
+| Analytical, aggregated, historical, 150+ chains     | Fast, indexed, latest state, 80+ chains       |
+
+**Default to Explorer for anything analytical, comparative, historical, or "across X."** Realtime is for current state of a known address / token.
+
+---
+
 ## Before Calling Any Endpoint
 
-Read `references/realtime/overview.md` first — it covers supported chains discovery, error codes, pagination, and conventions that apply across all commands.
+- **Explorer**: read `references/explorer.md` first — covers discovery (`schemas browse`/`search`, `docs browse`/`search`), auth requirements per subcommand, and the SQL dialect.
+- **Realtime**: read `references/realtime/overview.md` — supported chains discovery, error codes, pagination, conventions.
 
 ---
 
@@ -44,53 +63,61 @@ Before running any `allium` command for the first time in a session, run `--help
 
 ```bash
 # First: check available flags
-allium realtime prices latest --help
+allium explorer schemas browse --help
 
-# Then: run the actual command with correct flags
-allium realtime prices latest --chain ethereum --token-address 0x000...
+# Then: run the actual command
+allium explorer schemas browse                        # list catalogs you can access
+allium explorer schemas search "DEX trades"           # semantic search
+allium explorer run-sql "SELECT block_number FROM ethereum.raw.blocks LIMIT 5"
 ```
 
-This matters because flag names and required parameters vary between subcommands, and the reference docs may not cover every optional flag. The `--help` output is always authoritative. Do this once per subcommand — after that, you know the flags and can reuse them.
-
----
-
-## Realtime vs Explorer
-
-| Realtime (`allium realtime ...`)              | Explorer (`allium explorer ...`)                   |
-| --------------------------------------------- | -------------------------------------------------- |
-| "What's ETH worth right now?"                 | "How did ETH perform over the last year?"           |
-| "Show my wallet balances"                     | "What's the total value locked across all chains?"  |
-| "Get the price of SOL 2 hours ago"            | "Find the top 10 wallets by volume last month"      |
-| "List all tokens on Base"                     | "Compare daily active addresses across L2s"         |
-| "What's my PnL on this wallet?"               | "Custom SQL on any table"                           |
-| Fast, indexed, latest state                   | Analytical, aggregated, historical                  |
+The `--help` output is always authoritative — flag names and required parameters vary per subcommand, and reference docs may not cover every option. Do this once per subcommand and reuse.
 
 ---
 
 ## Pick Your Command
 
-| You need                  | Command                               | Ref                             |
-| ------------------------- | ------------------------------------- | ------------------------------- |
-| Discover supported chains | `realtime supported-chains`           | references/realtime/overview.md |
-| Current price             | `realtime prices latest`              | references/realtime/prices.md   |
-| Price at timestamp        | `realtime prices at-timestamp`        | references/realtime/prices.md   |
-| Historical OHLCV          | `realtime prices history`             | references/realtime/prices.md   |
-| Token stats               | `realtime prices stats`               | references/realtime/prices.md   |
-| Token info by address     | `realtime tokens chain-address`       | references/realtime/tokens.md   |
-| List tokens               | `realtime tokens list`                | references/realtime/tokens.md   |
-| Search tokens             | `realtime tokens search`              | references/realtime/tokens.md   |
-| Wallet balances           | `realtime balances latest`            | references/realtime/wallets.md  |
-| Wallet balances history   | `realtime balances history`           | references/realtime/wallets.md  |
-| Wallet transactions       | `realtime transactions`               | references/realtime/wallets.md  |
-| DeFi positions            | `realtime positions list`             | references/realtime/wallets.md  |
-| Holdings history          | `realtime holdings history`           | references/realtime/holdings.md |
-| Wallet PnL                | `realtime pnl latest`                 | references/realtime/holdings.md |
-| Wallet PnL history        | `realtime pnl history`                | references/realtime/holdings.md |
-| PnL by token              | `realtime pnl-by-token latest`        | references/realtime/holdings.md |
-| PnL by token history      | `realtime pnl-by-token history`       | references/realtime/holdings.md |
-| Custom SQL                | `explorer run-sql`                    | references/explorer.md          |
+### Explorer (SQL analytics on the warehouse)
 
-> **CLI version note.** Latest commands (`pnl latest`/`history`, `holdings history`, `pnl-by-token`, `positions list`, `supported-chains`) require allium-cli newer than the 0.3.1 PyPI release. If `allium realtime <subcommand> --help` returns "no such command," refresh: `uv tool install --upgrade allium-cli` (or `pipx upgrade allium-cli`). See `references/setup.md`.
+Start here for any analytical question. Discovery first, then SQL.
+
+| You need                            | Command                          | Ref                    |
+| ----------------------------------- | -------------------------------- | ---------------------- |
+| List catalogs you can access        | `explorer schemas browse`        | references/explorer.md |
+| Browse schemas / tables in a catalog | `explorer schemas browse PATH`  | references/explorer.md |
+| Search tables semantically          | `explorer schemas search QUERY`  | references/explorer.md |
+| Full table column metadata          | `explorer schemas browse db.schema.table` | references/explorer.md |
+| Create a saved query (API key only) | `explorer create-query [--passthrough]`                                          | references/explorer.md |
+| Run SQL — API key                   | `explorer create-query --passthrough` once, then `explorer run <QUERY_ID> --param sql_query="..."` | references/explorer.md |
+| Run SQL — x402 / Tempo              | `explorer run-sql "..."` (ad-hoc, single call) | references/explorer.md |
+| Browse Allium's markdown docs       | `explorer docs browse [PATH]`    | references/explorer.md |
+| Search Allium docs                  | `explorer docs search QUERY`     | references/explorer.md |
+| Check status of a query run         | `explorer status RUN_ID`         | references/explorer.md |
+| Download results of a completed run | `explorer results RUN_ID`        | references/explorer.md |
+
+### Realtime (live indexed data, 3-5s freshness)
+
+| You need                  | Command                          | Ref                             |
+| ------------------------- | -------------------------------- | ------------------------------- |
+| Discover supported chains | `realtime supported-chains`      | references/realtime/overview.md |
+| Current price             | `realtime prices latest`         | references/realtime/prices.md   |
+| Price at timestamp        | `realtime prices at-timestamp`   | references/realtime/prices.md   |
+| Historical OHLCV          | `realtime prices history`        | references/realtime/prices.md   |
+| Token stats               | `realtime prices stats`          | references/realtime/prices.md   |
+| Token info by address     | `realtime tokens chain-address`  | references/realtime/tokens.md   |
+| List tokens               | `realtime tokens list`           | references/realtime/tokens.md   |
+| Search tokens             | `realtime tokens search`         | references/realtime/tokens.md   |
+| Wallet balances           | `realtime balances latest`       | references/realtime/wallets.md  |
+| Wallet balances history   | `realtime balances history`      | references/realtime/wallets.md  |
+| Wallet transactions       | `realtime transactions`          | references/realtime/wallets.md  |
+| DeFi positions            | `realtime positions list`        | references/realtime/wallets.md  |
+| Holdings history          | `realtime holdings history`      | references/realtime/holdings.md |
+| Wallet PnL                | `realtime pnl latest`            | references/realtime/holdings.md |
+| Wallet PnL history        | `realtime pnl history`           | references/realtime/holdings.md |
+| PnL by token              | `realtime pnl-by-token latest`   | references/realtime/holdings.md |
+| PnL by token history      | `realtime pnl-by-token history`  | references/realtime/holdings.md |
+
+> If `allium <subcommand> --help` returns "no such command," upgrade the CLI — see `references/setup.md`.
 
 ---
 
@@ -136,6 +163,20 @@ Don't use `--format table` as an agent — output gets truncated and you'll need
 
 ## Endpoint Costs
 
+**Explorer**
+
+| Command                          | Cost per call         |
+| -------------------------------- | --------------------- |
+| `explorer schemas browse`        | $0.01                 |
+| `explorer schemas search`        | $0.01                 |
+| `explorer docs browse`           | $0.01                 |
+| `explorer docs search`           | $0.01                 |
+| `explorer run-sql`               | $0.01                 |
+| `explorer run`                   | $0.01                 |
+| `explorer create-query`          | free (API-key only)   |
+
+**Realtime**
+
 | Command                          | Cost per call |
 | -------------------------------- | ------------- |
 | `realtime prices latest`         | $0.02         |
@@ -154,8 +195,6 @@ Don't use `--format table` as an agent — output gets truncated and you'll need
 | `realtime pnl history`           | $0.01         |
 | `realtime pnl-by-token latest`   | $0.01         |
 | `realtime pnl-by-token history`  | $0.01         |
-| `explorer run-sql`               | $0.01         |
-| `explorer run`                   | $0.01         |
 
 Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a single pair.
 
@@ -165,10 +204,10 @@ Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a sing
 
 | File                                                    | When to read                                      |
 | ------------------------------------------------------- | ------------------------------------------------- |
-| [realtime/overview.md](references/realtime/overview.md) | **Read first** — supported chains, errors, pagination, conventions |
+| [explorer.md](references/explorer.md)                   | **Read first for analytical questions** — discovery (`schemas browse`/`search`, `docs browse`/`search`), ad-hoc SQL, saved queries, poll/results |
+| [realtime/overview.md](references/realtime/overview.md) | **Read first for realtime questions** — supported chains, errors, pagination, conventions |
 | [realtime/prices.md](references/realtime/prices.md)     | Token prices (current, history, stats, timestamp)  |
 | [realtime/tokens.md](references/realtime/tokens.md)     | Token lookup (list, search, by address)            |
 | [realtime/wallets.md](references/realtime/wallets.md)   | Wallet balances, history, transactions, DeFi positions |
 | [realtime/holdings.md](references/realtime/holdings.md) | Holdings history, PnL by wallet/token              |
-| [explorer.md](references/explorer.md)                   | Explorer SQL (ad-hoc, saved queries, poll results) |
 | [setup.md](references/setup.md)                         | CLI install + auth setup                           |

@@ -8,13 +8,7 @@ curl -sSL http://agents.allium.so/cli/install.sh | sh
 
 Verify: `allium --help`. If `allium: command not found`, add `~/.local/bin` to PATH and re-source your shell.
 
-> **Already installed?** Some of the documented subcommands (`pnl latest`/`history`, `holdings history`, `pnl-by-token`, `positions list`, `supported-chains`) require a build newer than the 0.3.1 PyPI release. If `allium realtime <subcommand> --help` returns "no such command," upgrade:
->
-> ```bash
-> uv tool install --upgrade allium-cli   # uv users
-> pipx upgrade allium-cli                # pipx users
-> pip install --user --upgrade allium-cli  # pip users
-> ```
+> **Command not found?** If `allium <subcommand> --help` returns "no such command", upgrade the CLI — re-run the install script above, or `uv tool install --upgrade allium-cli` / `pipx upgrade allium-cli` / `pip install --user --upgrade allium-cli` depending on how you installed it.
 
 ---
 

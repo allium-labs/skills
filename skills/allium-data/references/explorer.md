@@ -4,103 +4,112 @@ Use Explorer when the user needs **historical analysis, cross-chain comparisons,
 
 ---
 
-## Auth Requirements
+## Discovery
 
-| Command              | API Key | x402 | Tempo |
-| -------------------- | ------- | ---- | ----- |
-| `explorer run`       | Yes     | Yes  | Yes   |
-| `explorer status`    | Yes     | Yes  | Yes   |
-| `explorer results`   | Yes     | Yes  | Yes   |
-| `explorer run-sql`   | No      | Yes  | Yes   |
-
-**Ad-hoc SQL (`run-sql`) requires machine payment auth** (x402 or Tempo). If the active profile is `api_key`, use saved queries via `explorer run` instead.
-
-Check the active profile: `allium auth list`.
-
----
-
-## Schema Discovery
-
-Before writing SQL, discover available tables and columns:
+Before writing SQL, discover what catalogs / tables / docs the active profile can see. The CLI exposes four commands for this:
 
 ```bash
-curl -s https://docs.allium.so/llms.txt
+allium explorer schemas browse                  # list catalogs you can access
+allium explorer schemas browse ethereum         # list schemas in ethereum
+allium explorer schemas browse ethereum.raw     # list tables in ethereum.raw
+allium explorer schemas browse ethereum.raw.blocks  # full table details (markdown)
+
+allium explorer schemas search "DEX trades"     # semantic search across tables
+                                                # → returns table IDs; feed into `schemas browse <id>`
+
+allium explorer docs browse                     # list root of the markdown docs tree
+allium explorer docs browse api/overview.mdx    # get a specific doc page
+allium explorer docs search "x402 setup"        # semantic search across docs
 ```
 
-This returns a listing of all Allium documentation pages. Use it to find table schemas, column names, and supported chains. Never guess table or column names.
+Results are scoped to the active profile's permissions — if your API key / x402 wallet doesn't have USAGE on a catalog, schema, or table, it won't appear. Run `allium auth list` to check the active profile.
+
+If `allium explorer schemas --help` returns "no such command", upgrade the CLI — see `setup.md`.
+
+> **Fallback:** if the CLI isn't installed at all, `curl -s https://docs.allium.so/llms.txt` returns a flat doc index. Discovery via the CLI is preferred — it's auth-scoped, the `llms.txt` mirror is not.
 
 SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.{schema}.{table}`.
 
 ---
 
-## Ad-hoc SQL (x402 / Tempo only)
+## Auth Requirements
 
-The CLI handles the async poll loop internally — submit SQL and get results in one step.
+| Command                    | API Key | x402 | Tempo |
+| -------------------------- | ------- | ---- | ----- |
+| `explorer run`             | Yes     | Yes  | Yes   |
+| `explorer status`          | Yes     | Yes  | Yes   |
+| `explorer results`         | Yes     | Yes  | Yes   |
+| `explorer schemas browse`  | Yes     | Yes  | Yes   |
+| `explorer schemas search`  | Yes     | Yes  | Yes   |
+| `explorer docs browse`     | Yes     | Yes  | Yes   |
+| `explorer docs search`     | Yes     | Yes  | Yes   |
+| `explorer create-query`    | Yes     | No   | No    |
+| `explorer run-sql`         | **No**  | Yes  | Yes   |
 
-Don't use `--format table` as an agent — output gets truncated.
+`run-sql` is the only Explorer command that's not API-key-callable; `create-query` is the only one that's API-key-only (it writes a saved query to your account). The two paths to actually execute SQL diverge by auth method — read the next two sections.
 
-**Inline SQL:**
-
-```bash
-allium explorer run-sql "SELECT block_number, block_timestamp FROM ethereum.raw.blocks ORDER BY block_number DESC LIMIT 10"
-```
-
-**From a .sql file:**
-
-```bash
-allium explorer run-sql query.sql
-```
-
-**From stdin:**
-
-```bash
-echo "SELECT COUNT(*) FROM ethereum.raw.transactions WHERE block_timestamp > '2026-03-01'" | allium explorer run-sql -
-```
-
-**With row limit:**
-
-```bash
-allium explorer run-sql --limit 100 "SELECT * FROM ethereum.raw.blocks"
-```
-
-**Async (don't wait for results):**
-
-```bash
-allium explorer run-sql --no-wait "SELECT * FROM ethereum.raw.blocks LIMIT 1000"
-# prints run_id immediately; check later:
-allium explorer status <RUN_ID>
-allium explorer results <RUN_ID>
-```
+Check the active profile: `allium auth list`.
 
 ---
 
-## Saved Queries (any auth)
+## Running SQL — pick the path that matches your auth
 
-Run pre-built queries created at [app.allium.so](https://app.allium.so) or via the API. Works with all auth methods including API key.
+There are two ways to execute SQL on Allium. **Pick by your active profile**, not by what feels easier — `run-sql` will reject API-key requests outright.
 
-```bash
-allium explorer run <QUERY_ID>
-```
+### API key — create a saved query, then run it
 
-**With parameters:**
+This is the path for any caller using an Allium API key (`auth setup --method api_key`). API keys cannot send raw SQL to the warehouse, so you create a server-side saved query once and execute it as many times as you want, optionally with parameters.
 
-```bash
-allium explorer run <QUERY_ID> --param chain=ethereum --param days=30
-```
-
-**With compute profile:**
+**Step 1 — create a passthrough query (one-time):**
 
 ```bash
-allium explorer run <QUERY_ID> --compute-profile large
+allium explorer create-query --passthrough
+# → returns the new query record, including `query_id`. Save the id.
 ```
 
-**Async:**
+`--passthrough` writes a saved query whose SQL is just `{{ sql_query }}` — from then on, any SQL runs by passing it as a `sql_query` parameter. One create call covers every ad-hoc query for the lifetime of that API key.
+
+**Step 2 — run any SQL:**
 
 ```bash
-allium explorer run <QUERY_ID> --no-wait
-allium explorer status <RUN_ID>
-allium explorer results <RUN_ID>
+allium explorer run <QUERY_ID> \
+  --param sql_query="SELECT block_number, block_timestamp FROM ethereum.raw.blocks ORDER BY block_number DESC LIMIT 10"
 ```
+
+The CLI handles the async poll loop. Output is JSON by default.
+
+**Pre-defined queries with typed parameters** — drop `--passthrough` and pass the SQL as an argument with Jinja `{{ name }}` placeholders:
+
+```bash
+allium explorer create-query \
+  "SELECT block_number, block_timestamp FROM ethereum.raw.blocks ORDER BY block_number DESC LIMIT {{ limit }}" \
+  --title "Recent ethereum blocks"
+
+allium explorer run <QUERY_ID> --param limit=100
+```
+
+You can also pass a `.sql` file path instead of inline SQL.
+
+**Other run flags:** `--limit N`, `--compute-profile large`, `--no-wait` (prints `run_id` and exits — poll later with `allium explorer status <RUN_ID>` and `allium explorer results <RUN_ID>`).
+
+You can also create / edit queries in the UI at [app.allium.so](https://app.allium.so) — same `query_id` works.
+
+### x402 / Tempo — ad-hoc SQL directly
+
+If your active profile is `x402_key`, `x402_privy`, or `tempo`, you can send raw SQL straight to the warehouse — `allium` handles payment, the async poll loop, and result fetching in one call.
+
+```bash
+allium explorer run-sql "SELECT block_number, block_timestamp FROM ethereum.raw.blocks ORDER BY block_number DESC LIMIT 10"
+allium explorer run-sql query.sql                                # from a file
+echo "SELECT COUNT(*) FROM ethereum.raw.blocks" | allium explorer run-sql -   # from stdin
+allium explorer run-sql --limit 100 "SELECT * FROM ethereum.raw.blocks"
+allium explorer run-sql --no-wait "SELECT * FROM ethereum.raw.blocks LIMIT 1000"
+# → prints run_id; poll later with `allium explorer status <RUN_ID>` and `allium explorer results <RUN_ID>`.
+```
+
+Don't use `--format table` as an agent — output truncates.
+
+If you try `run-sql` while on an api_key profile, the CLI fails fast with a usage error pointing back at the saved-query path above.
 
 ---
 
@@ -147,17 +156,22 @@ Access: `data` for rows, `meta.columns` for schema.
 
 | Command              | Cost per call                                        |
 | -------------------- | ---------------------------------------------------- |
-| `explorer run-sql`   | $0.01                                                |
-| `explorer run`       | $0.01                                                |
-| `explorer status`    | $0.01                                                |
-| `explorer results`   | ~$0.15/min of execution time (varies with complexity) |
+| `explorer run-sql`        | $0.01                                                |
+| `explorer run`            | $0.01                                                |
+| `explorer status`         | $0.01                                                |
+| `explorer results`        | ~$0.15/min of execution time (varies with complexity) |
+| `explorer schemas browse` | $0.01                                                |
+| `explorer schemas search` | $0.01                                                |
+| `explorer docs browse`    | $0.01                                                |
+| `explorer docs search`    | $0.01                                                |
+| `explorer create-query`   | free (API-key only)                                  |
 
 ---
 
 ## Gotchas
 
-1. **Always discover schemas first** — fetch `https://docs.allium.so/llms.txt` and find the right table docs before writing SQL
-2. **`run-sql` needs x402/Tempo** — API key users must use saved queries via `run`
+1. **Always discover schemas first** — `allium explorer schemas search "..."` then `allium explorer schemas browse <id>` for column metadata. Don't guess table names.
+2. **API key holders cannot use `run-sql`** — create a saved query first (`allium explorer create-query --passthrough`), then pass any SQL via `allium explorer run <QUERY_ID> --param sql_query="..."`. For pre-defined queries with typed parameters, drop `--passthrough` and pass the SQL as an argument with `{{ name }}` placeholders.
 3. **Snowflake SQL dialect** — `{chain}.{table}` or `crosschain.{schema}.{table}`
 4. **Server-side timeout** — queries time out after 10 minutes
 5. **Result format** — `--format json` (default), `table`, or `csv`
