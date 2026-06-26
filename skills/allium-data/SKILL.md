@@ -52,7 +52,7 @@ The CLI exposes **Explorer** (SQL analytics on Allium's full data warehouse) and
 
 ## Before Calling Any Endpoint
 
-- **Explorer**: read `references/explorer.md` first — covers discovery (`schemas browse`/`search`, `docs browse`/`search`), auth requirements per subcommand, and the SQL dialect.
+- **Explorer**: read `references/explorer.md` first — covers table discovery (via the docs mirror), auth requirements per subcommand, and the SQL dialect.
 - **Realtime**: read `references/realtime/overview.md` — supported chains discovery, error codes, pagination, conventions.
 
 ---
@@ -62,16 +62,15 @@ The CLI exposes **Explorer** (SQL analytics on Allium's full data warehouse) and
 Before running any `allium` command for the first time in a session, run `--help` on the specific subcommand to verify the exact flags:
 
 ```bash
-# First: check available flags
-allium explorer schemas browse --help
+# First: check available subcommands and flags
+allium explorer --help            # → run-sql, run, status, results
+allium explorer run-sql --help
 
-# Then: run the actual command
-allium explorer schemas browse                        # list catalogs you can access
-allium explorer schemas search "DEX trades"           # semantic search
+# Then: run the actual command (x402 / Tempo profile)
 allium explorer run-sql "SELECT block_number FROM ethereum.raw.blocks LIMIT 5"
 ```
 
-The `--help` output is always authoritative — flag names and required parameters vary per subcommand, and reference docs may not cover every option. Do this once per subcommand and reuse.
+The `--help` output is always authoritative — it lists the subcommands the installed CLI actually ships, and flag names vary per subcommand. The reference docs may describe a command a given CLI build doesn't expose, so trust `--help`. Do this once per subcommand and reuse.
 
 ---
 
@@ -83,15 +82,9 @@ Start here for any analytical question. Discovery first, then SQL.
 
 | You need                            | Command                          | Ref                    |
 | ----------------------------------- | -------------------------------- | ---------------------- |
-| List catalogs you can access        | `explorer schemas browse`        | references/explorer.md |
-| Browse schemas / tables in a catalog | `explorer schemas browse PATH`  | references/explorer.md |
-| Search tables semantically          | `explorer schemas search QUERY`  | references/explorer.md |
-| Full table column metadata          | `explorer schemas browse db.schema.table` | references/explorer.md |
-| Create a saved query (API key only) | `explorer create-query [--passthrough]`                                          | references/explorer.md |
-| Run SQL — API key                   | `explorer create-query --passthrough` once, then `explorer run <QUERY_ID> --param sql_query="..."` | references/explorer.md |
+| Discover tables / columns           | `curl -s https://docs.allium.so/llms.txt` (index), then the per-table `.md` page | references/explorer.md |
+| Run SQL — API key                   | create a passthrough query via `POST https://api.allium.so/api/v1/explorer/queries`, then `explorer run <QUERY_ID> --param sql_query="..."` | references/explorer.md |
 | Run SQL — x402 / Tempo              | `explorer run-sql "..."` (ad-hoc, single call) | references/explorer.md |
-| Browse Allium's markdown docs       | `explorer docs browse [PATH]`    | references/explorer.md |
-| Search Allium docs                  | `explorer docs search QUERY`     | references/explorer.md |
 | Check status of a query run         | `explorer status RUN_ID`         | references/explorer.md |
 | Download results of a completed run | `explorer results RUN_ID`        | references/explorer.md |
 
@@ -117,7 +110,7 @@ Start here for any analytical question. Discovery first, then SQL.
 | PnL by token              | `realtime pnl-by-token latest`   | references/realtime/holdings.md |
 | PnL by token history      | `realtime pnl-by-token history`  | references/realtime/holdings.md |
 
-> If `allium <subcommand> --help` returns "no such command," upgrade the CLI — see `references/setup.md`.
+> `allium <subcommand> --help` is authoritative for what the installed CLI ships. Upgrading (see `references/setup.md`) may add subcommands, but Explorer schema discovery and `create-query` are **not** in the released CLI today — use the docs-mirror discovery and the REST `create-query` path above.
 
 ---
 
@@ -167,13 +160,10 @@ Don't use `--format table` as an agent — output gets truncated and you'll need
 
 | Command                          | Cost per call         |
 | -------------------------------- | --------------------- |
-| `explorer schemas browse`        | $0.01                 |
-| `explorer schemas search`        | $0.01                 |
-| `explorer docs browse`           | $0.01                 |
-| `explorer docs search`           | $0.01                 |
 | `explorer run-sql`               | $0.01                 |
 | `explorer run`                   | $0.01                 |
-| `explorer create-query`          | free (API-key only)   |
+| `explorer status`                | $0.01                 |
+| `explorer results`               | ~$0.15/min of execution |
 
 **Realtime**
 
@@ -204,7 +194,7 @@ Batch calls (multiple `--chain`/`--token-address` pairs) cost the same as a sing
 
 | File                                                    | When to read                                      |
 | ------------------------------------------------------- | ------------------------------------------------- |
-| [explorer.md](references/explorer.md)                   | **Read first for analytical questions** — discovery (`schemas browse`/`search`, `docs browse`/`search`), ad-hoc SQL, saved queries, poll/results |
+| [explorer.md](references/explorer.md)                   | **Read first for analytical questions** — table discovery (docs mirror), ad-hoc SQL, saved queries, poll/results |
 | [realtime/overview.md](references/realtime/overview.md) | **Read first for realtime questions** — supported chains, errors, pagination, conventions |
 | [realtime/prices.md](references/realtime/prices.md)     | Token prices (current, history, stats, timestamp)  |
 | [realtime/tokens.md](references/realtime/tokens.md)     | Token lookup (list, search, by address)            |
