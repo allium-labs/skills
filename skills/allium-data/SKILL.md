@@ -62,7 +62,7 @@ The CLI exposes **Explorer** (SQL analytics on Allium's full data warehouse) and
 Before running any `allium` command for the first time in a session, run `--help` on the specific subcommand to verify the exact flags:
 
 ```bash
-# First: check available subcommands and flags
+# First: check available commands / flags
 allium explorer --help            # → run-sql, run, status, results
 allium explorer run-sql --help
 
@@ -70,7 +70,7 @@ allium explorer run-sql --help
 allium explorer run-sql "SELECT block_number FROM ethereum.raw.blocks LIMIT 5"
 ```
 
-The `--help` output is always authoritative — it lists the subcommands the installed CLI actually ships, and flag names vary per subcommand. The reference docs may describe a command a given CLI build doesn't expose, so trust `--help`. Do this once per subcommand and reuse.
+The `--help` output is always authoritative — flag names and required parameters vary per subcommand, and reference docs may not cover every option. Do this once per subcommand and reuse.
 
 ---
 
@@ -82,8 +82,8 @@ Start here for any analytical question. Discovery first, then SQL.
 
 | You need                            | Command                          | Ref                    |
 | ----------------------------------- | -------------------------------- | ---------------------- |
-| Discover tables / columns           | `curl -s https://docs.allium.so/llms.txt` (index), then the per-table `.md` page | references/explorer.md |
-| Run SQL — API key                   | create a passthrough query via `POST https://api.allium.so/api/v1/explorer/queries`, then `explorer run <QUERY_ID> --param sql_query="..."` | references/explorer.md |
+| Discover tables / columns           | `curl -s https://docs.allium.so/llms.txt` (quick index), then `llms-full.txt` / the per-table `.md` page | references/explorer.md |
+| Run SQL — API key                   | create a saved query via `POST /api/v1/explorer/queries`, then `explorer run <QUERY_ID> --param sql_query="..."` | references/explorer.md |
 | Run SQL — x402 / Tempo              | `explorer run-sql "..."` (ad-hoc, single call) | references/explorer.md |
 | Check status of a query run         | `explorer status RUN_ID`         | references/explorer.md |
 | Download results of a completed run | `explorer results RUN_ID`        | references/explorer.md |
@@ -110,7 +110,7 @@ Start here for any analytical question. Discovery first, then SQL.
 | PnL by token              | `realtime pnl-by-token latest`   | references/realtime/holdings.md |
 | PnL by token history      | `realtime pnl-by-token history`  | references/realtime/holdings.md |
 
-> `allium <subcommand> --help` is authoritative for what the installed CLI ships. Upgrading (see `references/setup.md`) may add subcommands, but Explorer schema discovery and `create-query` are **not** in the released CLI today — use the docs-mirror discovery and the REST `create-query` path above.
+> The released Explorer CLI currently exposes `run-sql`, `run`, `status`, and `results`. If `explorer schemas`, `explorer docs`, or `explorer create-query` return "no such command", use the docs-mirror discovery and REST create-query path in `references/explorer.md`.
 
 ---
 

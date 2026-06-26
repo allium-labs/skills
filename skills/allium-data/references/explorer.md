@@ -6,17 +6,22 @@ Use Explorer when the user needs **historical analysis, cross-chain comparisons,
 
 ## Discovery
 
-The shipped CLI's `explorer` command exposes only `run-sql`, `run`, `status`, and `results` (`allium explorer --help`) — there is no in-CLI schema or docs browser. Discover tables and columns through Allium's docs mirror before writing SQL:
+Before writing SQL, discover what tables / docs are available. The released CLI exposes `run-sql`, `run`, `status`, and `results`; it does not expose `explorer schemas` or `explorer docs` commands. Use Allium's docs mirror for table discovery:
 
 ```bash
-# Flat index of every documented table — grep it for the table you need
+# Quick index — grep it for the table you need
 curl -s https://docs.allium.so/llms.txt | grep -i "erc20"
 
-# Per-table page: columns, types, description (append .md to any docs URL)
-curl -s "https://docs.allium.so/historical-data/supported-blockchains/evm/ethereum/assets/transfers/erc20-token-transfers.md"
+# If the quick index doesn't include the page, search the full docs mirror
+curl -s https://docs.allium.so/llms-full.txt | grep -i "ethereum/assets/token-transfers"
+
+# Per-table page: columns, types, description
+curl -s "https://docs.allium.so/historical-data/supported-blockchains/evm/ethereum/assets/token-transfers/erc20-transfers.md"
 ```
 
-The docs mirror is **not** auth-scoped — it lists every table Allium documents, not only the ones your profile can query. If a query later fails with a permissions error, your API key / x402 wallet lacks USAGE on that catalog; check the active profile with `allium auth list`.
+The quick `llms.txt` index may be truncated; use `llms-full.txt` when discovery misses a table. Copy exact docs URLs / source paths from the index or mirror instead of deriving paths by hand.
+
+The docs mirror is **not** auth-scoped — it lists documented tables, not only the ones your profile can query. If a query later fails with a permissions error, your API key / x402 wallet lacks USAGE on that catalog; check the active profile with `allium auth list`.
 
 SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.{schema}.{table}`.
 
@@ -31,7 +36,7 @@ SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.
 | `explorer results`         | Yes     | Yes  | Yes   |
 | `explorer run-sql`         | **No**  | Yes  | Yes   |
 
-`run-sql` (ad-hoc SQL) is the only execution command that's not API-key-callable — it rejects API keys with `400: This endpoint requires machine payment authentication with a preset query ID`. The two paths to execute SQL diverge by auth method — read the next two sections.
+`run-sql` is the only Explorer execution command that's not API-key-callable; it rejects API keys with `400: This endpoint requires machine payment authentication with a preset query ID`. The two paths to execute SQL diverge by auth method — read the next two sections.
 
 Check the active profile: `allium auth list`.
 
@@ -68,7 +73,7 @@ allium explorer run <QUERY_ID> \
 
 The CLI handles the async poll loop. Output is JSON by default.
 
-**Pre-defined queries with typed parameters** — POST a `config.sql` with Jinja `{{ name }}` placeholders instead of the `{{ sql_query }}` passthrough, then run with `--param`:
+**Pre-defined queries with typed parameters** — POST `config.sql` with Jinja `{{ name }}` placeholders instead of the `{{ sql_query }}` passthrough, then run with `--param`:
 
 ```bash
 curl -s -X POST "https://api.allium.so/api/v1/explorer/queries" \
@@ -154,7 +159,7 @@ Access: `data` for rows, `meta.columns` for schema.
 
 ## Gotchas
 
-1. **Discover tables from the docs mirror first** — `curl -s https://docs.allium.so/llms.txt` for the index, then the per-table `.md` page for column metadata. The CLI has no `schemas` browser. Don't guess table names.
+1. **Discover tables from the docs mirror first** — `curl -s https://docs.allium.so/llms.txt` for the quick index, `llms-full.txt` if the quick index is truncated, then the per-table `.md` page for column metadata. The CLI has no `schemas` browser. Don't guess table names or derive docs paths by hand.
 2. **API key holders cannot use `run-sql`** — create a passthrough saved query once via `POST https://api.allium.so/api/v1/explorer/queries` (the CLI has no `create-query`), then pass any SQL via `allium explorer run <QUERY_ID> --param sql_query="..."`.
 3. **Snowflake SQL dialect** — `{chain}.{table}` or `crosschain.{schema}.{table}`
 4. **Server-side timeout** — queries time out after 10 minutes
