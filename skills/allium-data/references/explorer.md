@@ -31,12 +31,12 @@ SQL uses **Snowflake dialect**. Schema format: `{chain}.{table}` or `crosschain.
 
 | Command                    | API Key | x402 | Tempo |
 | -------------------------- | ------- | ---- | ----- |
-| `explorer run`             | Yes     | Yes  | Yes   |
-| `explorer status`          | Yes     | Yes  | Yes   |
-| `explorer results`         | Yes     | Yes  | Yes   |
+| `explorer run`             | Yes     | No   | No    |
+| `explorer status`          | Yes     | No   | No    |
+| `explorer results`         | Yes     | No   | No    |
 | `explorer run-sql`         | **No**  | Yes  | Yes   |
 
-`run-sql` is the only Explorer execution command that's not API-key-callable; it rejects API keys with `400: This endpoint requires machine payment authentication with a preset query ID`. The two paths to execute SQL diverge by auth method — read the next two sections.
+`run-sql` is the only Explorer execution command that's not API-key-callable; it rejects API keys with `400: This endpoint requires machine payment authentication with a preset query ID`. Saved-query execution (`run`) and follow-up polling / result download (`status`, `results`) require API-key auth. The two paths to execute SQL diverge by auth method — read the next two sections.
 
 Check the active profile: `allium auth list`.
 
@@ -97,8 +97,6 @@ allium explorer run-sql "SELECT block_number, block_timestamp FROM ethereum.raw.
 allium explorer run-sql query.sql                                # from a file
 echo "SELECT COUNT(*) FROM ethereum.raw.blocks" | allium explorer run-sql -   # from stdin
 allium explorer run-sql --limit 100 "SELECT * FROM ethereum.raw.blocks"
-allium explorer run-sql --no-wait "SELECT * FROM ethereum.raw.blocks LIMIT 1000"
-# → prints run_id; poll later with `allium explorer status <RUN_ID>` and `allium explorer results <RUN_ID>`.
 ```
 
 Don't use `--format table` as an agent — output truncates.
