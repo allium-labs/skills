@@ -118,8 +118,8 @@ Results default to JSON:
   ],
   "meta": {
     "columns": [
-      {"name": "chain", "data_type": "TEXT"},
-      {"name": "block_number", "data_type": "NUMBER"}
+      {"name": "chain", "data_type": "varchar(16777216)"},
+      {"name": "block_number", "data_type": "number(18,0)"}
     ],
     "row_count": 2,
     "run_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -128,7 +128,9 @@ Results default to JSON:
 }
 ```
 
-Access: `data` for rows, `meta.columns` for schema.
+Access: `data` for rows, `meta.columns` for schema. `data_type` values are raw Snowflake
+types (e.g. `varchar(16777216)`, `number(18,0)`, `timestamp_ntz(9)`, `float`), not generic
+`TEXT`/`NUMBER` labels.
 
 ---
 
@@ -162,3 +164,22 @@ Access: `data` for rows, `meta.columns` for schema.
 3. **Snowflake SQL dialect** — `{chain}.{table}` or `crosschain.{schema}.{table}`
 4. **Server-side timeout** — queries time out after 10 minutes
 5. **Result format** — `--format json` (default), `table`, or `csv`
+6. **Stablecoin/asset `product_id` is canonical-only — bridged variants silently undercount.**
+   On `stablecoins.core.transfers` (and `<chain>.stablecoins.transfers`), filtering
+   `product_id IN ('usdc','usdt')` matches only the canonical issuance. Bridged/wrapped
+   variants carry distinct ids — e.g. USDT on Arbitrum is `usdt0_layerzero`, on Base it's
+   `usdt_canonical_bridge` / `openusdt_layerzero` / `usdt0_stargate` — so a naive filter
+   returns **zero rows** for those chains and undercounts multi-chain USDT volume by tens of
+   billions per month. Resolve the family through the registry catalog instead:
+
+   ```sql
+   SELECT t.chain, sum(t.usd_amount) AS volume_usd
+   FROM stablecoins.core.transfers t
+   JOIN stablecoins.registry.catalog c USING (product_id)
+   WHERE (c.underlying_product_id = 'usdt' OR c.product_id = 'usdt')
+     AND t.block_timestamp >= current_timestamp - interval '30 days'
+   GROUP BY 1
+   ```
+
+   Same trap applies to filtering token transfers by `token_symbol` — multiple contracts
+   share a symbol. Resolve via the catalog / canonical id, not the ticker string.
