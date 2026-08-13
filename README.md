@@ -2,19 +2,40 @@
 
 Agent Skills for integrating [Allium](https://www.allium.so/) blockchain data APIs into AI-powered applications, plus partner ecosystem skills that complement Allium in a single agent session.
 
-## Skills
+## Data access
 
-### `skills/allium-onchain-data`
-Query blockchain data via Allium APIs: token prices, wallet balances, transactions, PnL, historical data, and custom SQL analytics across 70+ chains.
+### `skills/allium-data`
+Query blockchain data using the `allium` CLI. Two products: Explorer (SQL analytics on Allium's data warehouse — any table, any timeframe, 150+ chains) and Realtime (3-5s freshness lookups for prices, balances, transactions, PnL, positions across 80+ chains). Supports API key, x402 micropayments, and Tempo auth.
 
-- **Auth**: API key in header (`X-API-KEY`)
+- **Auth**: API key, x402 micropayments, or Tempo
 - **Setup**: Register at [app.allium.so](https://app.allium.so/) or via the API
-- **Entry point**: [`skills/allium-onchain-data/SKILL.md`](skills/allium-onchain-data/SKILL.md)
+- **Entry point**: [`skills/allium-data/SKILL.md`](skills/allium-data/SKILL.md)
 
-### `skills/allium-x402`
-Pay-per-call keyless access to Allium via the `allium` CLI. Supports API key, x402 micropayments, and Tempo auth.
+## Analyst workflow
 
-- **Entry point**: [`skills/allium-x402/SKILL.md`](skills/allium-x402/SKILL.md)
+Two skills that chain together for any analytical question:
+
+### `skills/data-matching`
+Match a question to the right Allium table, metric, dashboard, or realtime endpoint before writing any SQL — defines a data contract, compares candidate sources, and proves coverage with a bounded query.
+
+- **Entry point**: [`skills/data-matching/SKILL.md`](skills/data-matching/SKILL.md)
+
+### `skills/allium-investigation`
+Investigate an onchain entity, protocol, market, or wallet question — check Terminal for existing coverage first, build the method from a small test to a production query, validate the result, make calibrated claims, and save reproducible Explorer queries (with an optional dashboard hand-off prompt for Allium Assistant).
+
+- **Entry point**: [`skills/allium-investigation/SKILL.md`](skills/allium-investigation/SKILL.md)
+
+## Sector methodology
+
+Sector-specific pitfalls (double-counting, table/column gotchas, classification rules) that come up repeatedly in real analysis. Each one plugs into the workflow above at the `data-matching` step — use it whenever the question touches that sector.
+
+| Skill | Covers |
+|---|---|
+| [`skills/rwa-analysis`](skills/rwa-analysis/SKILL.md) | Tokenized real-world assets — treasuries, money market funds, tokenized equities, commodities |
+| [`skills/stablecoin-analysis`](skills/stablecoin-analysis/SKILL.md) | Stablecoin transfer volume, supply, holders, and geographic usage |
+| [`skills/bridge-analysis`](skills/bridge-analysis/SKILL.md) | Cross-chain bridge and messaging-protocol data (CCTP, LayerZero, Wormhole, Across) |
+| [`skills/dex-analysis`](skills/dex-analysis/SKILL.md) | DEX/AMM trades, liquidity, aggregator routing, and DEX-derived pricing |
+| [`skills/lending-analysis`](skills/lending-analysis/SKILL.md) | DeFi lending protocol deposits, borrows, liquidations, and utilization |
 
 ## Partner skills
 
@@ -34,8 +55,14 @@ Build production application code on Alchemy infrastructure with an Alchemy API 
 
 | Scenario | Skill |
 |---|---|
-| Token prices, wallet balances, transaction history, PnL, custom SQL | `allium-onchain-data` |
-| Pay-per-call keyless access to Allium (x402) | `allium-x402` |
+| Any Allium data query — prices, balances, transactions, PnL, custom SQL | `allium-data` |
+| Picking the right table/metric/endpoint before analyzing anything | `data-matching` |
+| Investigating an entity, protocol, market, or wallet question, and saving/sharing the result | `allium-investigation` |
+| Tokenized real-world assets (treasuries, MMFs, tokenized equities) | `rwa-analysis` |
+| Stablecoin volume, supply, or holder analysis | `stablecoin-analysis` |
+| Cross-chain bridge or messaging-protocol analysis | `bridge-analysis` |
+| DEX/AMM trades, liquidity, or aggregator analysis | `dex-analysis` |
+| DeFi lending protocol analysis | `lending-analysis` |
 | Pay-per-call keyless access to Alchemy infrastructure (x402/MPP) | `alchemy-agentic-gateway` |
 | Build app code on Alchemy infra (RPC, webhooks, Account Kit, simulation) | `alchemy-api` |
 

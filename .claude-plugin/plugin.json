@@ -1,7 +1,7 @@
 {
   "name": "allium",
-  "version": "0.1.0",
-  "description": "Agent Skills for integrating Allium blockchain data APIs and partner ecosystem skills.",
+  "version": "0.2.0",
+  "description": "Agent Skills for querying Allium blockchain data, analyst methodology (data matching, investigation), sector-specific analysis (RWA, stablecoins, bridges, DEX, lending), and partner ecosystem skills.",
   "author": {
     "name": "Allium Labs",
     "url": "https://www.allium.so/"
