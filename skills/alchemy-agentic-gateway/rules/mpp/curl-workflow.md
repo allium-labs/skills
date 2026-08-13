@@ -178,7 +178,7 @@ For full details on both payment methods, see [payment](payment.md).
 
 **Note:** After a successful payment, subsequent requests using the same auth token will return 200 without requiring payment again.
 
-#### Tempo (on-chain USDC)
+#### Tempo (onchain USDC)
 
 ```bash
 TOKEN=$(cat siwe-token.txt)

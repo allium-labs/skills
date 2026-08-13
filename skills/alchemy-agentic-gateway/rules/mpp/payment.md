@@ -6,14 +6,14 @@ The `mppx/client` library handles 402 Payment Required flows automatically — y
 
 | Method | Description | Requirements |
 |--------|-------------|-------------|
-| **Tempo** | On-chain USDC payment (gasless, EVM only) | EVM wallet funded with USDC, SIWE auth |
+| **Tempo** | Onchain USDC payment (gasless, EVM only) | EVM wallet funded with USDC, SIWE auth |
 | **Stripe** | Credit card payment via SPT (Shared Payment Token) | `createToken` callback proxied through a server, EVM wallet for auth |
 
 The user chooses their payment method during setup (see [wallet-bootstrap](wallet-bootstrap.md)).
 
 ## How It Works
 
-### Tempo (on-chain USDC)
+### Tempo (onchain USDC)
 
 `tempo.charge` takes a viem `account` and handles the full 402 flow: parsing the challenge, signing a TIP-20 transfer, and retrying with the credential.
 
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
 ## Payment Details
 
-- **Tempo**: On-chain TIP-20 token transfer on Tempo. Gasless when server uses `feePayer`. Settlement in ~500ms.
+- **Tempo**: Onchain TIP-20 token transfer on Tempo. Gasless when server uses `feePayer`. Settlement in ~500ms.
 - **Stripe**: Card payment via SPT. Settlement through Stripe's payment rails.
 - **Amount**: Determined by the gateway per request.
 - **Settlement**: The gateway verifies the credential and settles the payment automatically.

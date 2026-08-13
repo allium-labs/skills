@@ -20,12 +20,12 @@ Complete index of all reference files organized by product area. Use the Endpoin
 ## Simulation
 | File | Name | Short Description |
 | --- | --- | --- |
-| `references/data-simulation-api.md` | Simulation API | Simulate transactions before submitting them on-chain. Use this for safety checks and user previews |
+| `references/data-simulation-api.md` | Simulation API | Simulate transactions before submitting them onchain. Use this for safety checks and user previews |
 
 ## Webhooks
 | File | Name | Short Description |
 | --- | --- | --- |
-| `references/webhooks-overview.md` | webhooks | Push-based delivery of blockchain events via Alchemy Notify API. Use when you need real-time notifications for address activity, NFT transfers, or custom on-chain events instead of polling. Covers webhook creation, payload formats, signature verification, and filtering |
+| `references/webhooks-overview.md` | webhooks | Push-based delivery of blockchain events via Alchemy Notify API. Use when you need real-time notifications for address activity, NFT transfers, or custom onchain events instead of polling. Covers webhook creation, payload formats, signature verification, and filtering |
 | `references/webhooks-address-activity.md` | Address Activity Webhooks | Address activity webhooks notify you when specified addresses send or receive assets |
 | `references/webhooks-custom-webhooks.md` | Custom Webhooks (GraphQL) | Custom webhooks allow flexible event filtering using a GraphQL query hosted by Alchemy |
 | `references/webhooks-details.md` | Webhooks Overview (Notify) | Notify webhooks push blockchain events to your server so you don't need to poll. They are ideal for near real-time pipelines |

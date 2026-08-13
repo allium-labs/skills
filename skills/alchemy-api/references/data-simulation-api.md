@@ -1,7 +1,7 @@
 ---
 id: references/data-simulation-api.md
 name: 'Simulation API'
-description: 'Simulate transactions before submitting them on-chain. Use this for safety checks and user previews.'
+description: 'Simulate transactions before submitting them onchain. Use this for safety checks and user previews.'
 tags:
   - alchemy
   - data-apis
@@ -13,7 +13,7 @@ updated: 2026-02-23
 ---
 # Simulation API
 
-Simulate transactions before submitting them on-chain. Preview asset changes and execution traces. JSON-RPC POST requests.
+Simulate transactions before submitting them onchain. Preview asset changes and execution traces. JSON-RPC POST requests.
 
 **Base URL**: `https://<network>.g.alchemy.com/v2/$ALCHEMY_API_KEY`
 
@@ -297,7 +297,7 @@ Returns an array of results, one per transaction. Each result has `calls` and `l
 
 ## Notes
 
-- Simulation does not guarantee real execution outcome if on-chain state changes between simulation and submission.
+- Simulation does not guarantee real execution outcome if onchain state changes between simulation and submission.
 - Bundle transactions execute sequentially — earlier transactions affect the state for later ones.
 - Simulation is more compute-intensive than standard reads. Cache results where possible.
 - Reverted simulations return an `error` object with the revert reason.

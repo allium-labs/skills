@@ -12,7 +12,7 @@ The easiest way to make requests is with `mppx/client`, which automatically hand
 npm install mppx viem
 ```
 
-### Tempo (on-chain USDC)
+### Tempo (onchain USDC)
 
 ```typescript
 import { Mppx, tempo } from "mppx/client";

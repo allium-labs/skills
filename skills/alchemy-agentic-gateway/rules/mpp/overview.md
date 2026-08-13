@@ -12,7 +12,7 @@ MPP supports two payment methods. The user must choose one during setup (see [wa
 
 | Method | How it works | Wallet type | Wallet funding needed? |
 |--------|-------------|-------------|----------------------|
-| **Tempo** | On-chain USDC payment (gasless) | EVM only (SIWE) | Yes — wallet must hold USDC |
+| **Tempo** | Onchain USDC payment (gasless) | EVM only (SIWE) | Yes — wallet must hold USDC |
 | **Stripe** | Credit card via SPT (Shared Payment Token) | EVM | No — card is charged directly |
 
 Both methods require a wallet for SIWE authentication. Tempo additionally requires the EVM wallet to be funded with USDC. Stripe uses a `createToken` callback that proxies through a server endpoint to create SPTs.
@@ -38,7 +38,7 @@ See [reference](reference.md) for all endpoints, supported chains, and available
 
 ## End-to-End Flow
 
-### Tempo (on-chain USDC)
+### Tempo (onchain USDC)
 
 1. **Choose payment method** → Tempo. See [wallet-bootstrap](wallet-bootstrap.md).
 2. **Set up an EVM wallet** — Create or import (Tempo requires EVM/SIWE).
@@ -70,7 +70,7 @@ Auto-handles the 402 payment flow. When using `mppx/client`, SIWE auth must go v
 | Export | Purpose |
 |--------|---------|
 | `Mppx` | Client with `fetch()` that auto-handles 402 challenges |
-| `tempo` | Payment method factory for on-chain USDC (Tempo) |
+| `tempo` | Payment method factory for onchain USDC (Tempo) |
 | `stripe` | Payment method factory for credit card (Stripe) |
 
 #### `mppx` — Low-Level Utilities (advanced use cases)

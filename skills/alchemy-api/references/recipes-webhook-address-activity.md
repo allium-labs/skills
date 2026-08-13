@@ -15,7 +15,7 @@ updated: 2026-02-05
 # Recipe: Address Activity Webhook
 
 ## Goal
-Receive push notifications when a wallet address is involved in on-chain activity.
+Receive push notifications when a wallet address is involved in onchain activity.
 
 ## Inputs
 - `addresses` to watch
