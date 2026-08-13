@@ -1,0 +1,21 @@
+{
+  "name": "allium-labs",
+  "owner": {
+    "name": "Allium Labs",
+    "url": "https://www.allium.so/"
+  },
+  "plugins": [
+    {
+      "name": "allium-agent",
+      "source": "./plugins/allium-agent",
+      "description": "Query Allium blockchain data (Explorer SQL + Realtime) via the allium CLI, plus partner infrastructure skills (Alchemy) that complement it in the same agent session.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "allium-analyst",
+      "source": "./plugins/allium-analyst",
+      "description": "Analyst methodology for Allium data: match a question to the right source, investigate it with a defensible reproducible method, and apply sector-specific pitfalls for RWA, stablecoins, bridges, DEX, and lending.",
+      "version": "0.1.0"
+    }
+  ]
+}
