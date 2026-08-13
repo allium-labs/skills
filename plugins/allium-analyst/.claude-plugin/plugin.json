@@ -1,0 +1,11 @@
+{
+  "name": "allium-analyst",
+  "version": "0.1.0",
+  "description": "Analyst methodology for Allium data: match a question to the right source, investigate it with a defensible reproducible method, and apply sector-specific pitfalls for RWA, stablecoins, bridges, DEX, and lending.",
+  "author": {
+    "name": "Allium Labs",
+    "url": "https://www.allium.so/"
+  },
+  "homepage": "https://github.com/allium-labs/skills",
+  "license": "MIT"
+}
