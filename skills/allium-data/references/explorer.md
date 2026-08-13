@@ -119,15 +119,16 @@ Results default to JSON:
 
 ```json
 {
-  "sql": "SELECT chain, block_number FROM ethereum.raw.blocks LIMIT 2",
+  "sql": "SELECT chain, block_number, block_timestamp FROM ethereum.raw.blocks LIMIT 2",
   "data": [
-    {"chain": "ethereum", "block_number": 20000000},
-    {"chain": "ethereum", "block_number": 20000001}
+    {"chain": "ethereum", "block_number": 20000000, "block_timestamp": "2026-03-17T18:04:11"},
+    {"chain": "ethereum", "block_number": 20000001, "block_timestamp": "2026-03-17T18:04:23"}
   ],
   "meta": {
     "columns": [
-      {"name": "chain", "data_type": "TEXT"},
-      {"name": "block_number", "data_type": "NUMBER"}
+      {"name": "chain", "data_type": "varchar(16777216)"},
+      {"name": "block_number", "data_type": "number(18,0)"},
+      {"name": "block_timestamp", "data_type": "timestamp_ntz(9)"}
     ],
     "row_count": 2,
     "run_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -136,7 +137,7 @@ Results default to JSON:
 }
 ```
 
-Access: `data` for rows, `meta.columns` for schema.
+`data_type` is the raw Snowflake type for each column (e.g. `varchar(16777216)`, `number(18,0)`, `timestamp_ntz(9)`, `float`) — not a generic `TEXT`/`NUMBER` label. Access: `data` for rows, `meta.columns` for schema.
 
 ---
 
