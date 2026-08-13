@@ -8,7 +8,11 @@ your team's actual analytical workflow on top of that access — how to pick a s
 a metric needs `last` instead of `sum`, which schema is current — so results are correct
 and reproducible without you having to re-explain the same pitfalls every session.
 
-Skills are organized into two plugins:
+Every skill's real content lives at `skills/<name>/` at the repo root — that's the single
+source of truth. They're also grouped into two independently-installable Claude Code
+plugins, `plugins/allium-agent/` and `plugins/allium-analyst/`, whose `skills/`
+directories are symlinks back to the same `skills/<name>/` folders rather than copies —
+one skill, one location, no drift between the flat repo and the plugin groupings.
 
 - **`allium-agent`** — direct data access: the `allium` CLI (Explorer + Realtime), plus
   partner infrastructure skills (Alchemy) that complement it in the same session.
@@ -16,7 +20,8 @@ Skills are organized into two plugins:
   question to the right source, running a defensible investigation, and sector-specific
   pitfalls (RWA, stablecoins, bridges, DEX, lending).
 
-You can install either independently, or both.
+You can install either plugin independently, both, or install specific skills directly
+without the plugin system at all (see Getting Started below).
 
 ## Getting Started
 
@@ -54,14 +59,14 @@ You can install either independently, or both.
 Query blockchain data using the `allium` CLI. Two products: Explorer (SQL analytics on Allium's data warehouse — any table, any timeframe, 150+ chains) and Realtime (3-5s freshness lookups for prices, balances, transactions, PnL, positions across 80+ chains). Supports API key, x402 micropayments, and Tempo auth.
 
 - **Auth**: API key, x402 micropayments, or Tempo
-- **Entry point**: [`plugins/allium-agent/skills/allium-data/SKILL.md`](plugins/allium-agent/skills/allium-data/SKILL.md)
+- **Entry point**: [`skills/allium-data/SKILL.md`](skills/allium-data/SKILL.md)
 
 ### Partner skills
 
 Contributed by ecosystem partners — see [`PARTNERS.md`](PARTNERS.md) for conventions and how to add a new one.
 
-- **`alchemy-agentic-gateway`** — wire Alchemy into application code without an API key, using x402 or MPP with wallet-based auth and per-request payments. Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](plugins/allium-agent/skills/alchemy-agentic-gateway/SKILL.md)
-- **`alchemy-api`** — build production application code on Alchemy infrastructure with an Alchemy API key (EVM JSON-RPC, WebSocket subscriptions, webhooks, Account Kit, Account Abstraction, simulation, Solana, Sui gRPC). Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](plugins/allium-agent/skills/alchemy-api/SKILL.md)
+- **`alchemy-agentic-gateway`** — wire Alchemy into application code without an API key, using x402 or MPP with wallet-based auth and per-request payments. Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](skills/alchemy-agentic-gateway/SKILL.md)
+- **`alchemy-api`** — build production application code on Alchemy infrastructure with an Alchemy API key (EVM JSON-RPC, WebSocket subscriptions, webhooks, Account Kit, Account Abstraction, simulation, Solana, Sui gRPC). Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](skills/alchemy-api/SKILL.md)
 
 ## `allium-analyst` — analyst methodology
 
@@ -70,12 +75,12 @@ Two skills that chain together for any analytical question:
 ### `data-matching`
 Match a question to the right Allium table, metric, dashboard, or realtime endpoint before writing any SQL — defines a data contract, compares candidate sources, and proves coverage with a bounded query.
 
-- **Entry point**: [`plugins/allium-analyst/skills/data-matching/SKILL.md`](plugins/allium-analyst/skills/data-matching/SKILL.md)
+- **Entry point**: [`skills/data-matching/SKILL.md`](skills/data-matching/SKILL.md)
 
 ### `allium-investigation`
 Investigate an onchain entity, protocol, market, or wallet question — check Terminal for existing coverage first, build the method from a small test to a production query, validate the result, make calibrated claims, and save reproducible Explorer queries (with an optional dashboard hand-off prompt for Allium Assistant).
 
-- **Entry point**: [`plugins/allium-analyst/skills/allium-investigation/SKILL.md`](plugins/allium-analyst/skills/allium-investigation/SKILL.md)
+- **Entry point**: [`skills/allium-investigation/SKILL.md`](skills/allium-investigation/SKILL.md)
 
 ### Sector methodology
 
@@ -83,11 +88,11 @@ Sector-specific pitfalls (double-counting, table/column gotchas, classification 
 
 | Skill | Covers |
 |---|---|
-| [`rwa-analysis`](plugins/allium-analyst/skills/rwa-analysis/SKILL.md) | Tokenized real-world assets — treasuries, money market funds, tokenized equities, commodities |
-| [`stablecoin-analysis`](plugins/allium-analyst/skills/stablecoin-analysis/SKILL.md) | Stablecoin transfer volume, supply, holders, and geographic usage |
-| [`bridge-analysis`](plugins/allium-analyst/skills/bridge-analysis/SKILL.md) | Cross-chain bridge and messaging-protocol data (CCTP, LayerZero, Wormhole, Across) |
-| [`dex-analysis`](plugins/allium-analyst/skills/dex-analysis/SKILL.md) | DEX/AMM trades, liquidity, aggregator routing, and DEX-derived pricing |
-| [`lending-analysis`](plugins/allium-analyst/skills/lending-analysis/SKILL.md) | DeFi lending protocol deposits, borrows, liquidations, and utilization |
+| [`rwa-analysis`](skills/rwa-analysis/SKILL.md) | Tokenized real-world assets — treasuries, money market funds, tokenized equities, commodities |
+| [`stablecoin-analysis`](skills/stablecoin-analysis/SKILL.md) | Stablecoin transfer volume, supply, holders, and geographic usage |
+| [`bridge-analysis`](skills/bridge-analysis/SKILL.md) | Cross-chain bridge and messaging-protocol data (CCTP, LayerZero, Wormhole, Across) |
+| [`dex-analysis`](skills/dex-analysis/SKILL.md) | DEX/AMM trades, liquidity, aggregator routing, and DEX-derived pricing |
+| [`lending-analysis`](skills/lending-analysis/SKILL.md) | DeFi lending protocol deposits, borrows, liquidations, and utilization |
 
 ## Which skill should I use?
 
@@ -108,7 +113,7 @@ Sector-specific pitfalls (double-counting, table/column gotchas, classification 
 
 These skills follow the [Agent Skills specification](https://agentskills.io/specification). See [spec/agent-skills-spec.md](spec/agent-skills-spec.md) for details.
 
-As Claude Code plugins, `allium-agent` and `allium-analyst` follow the [plugin specification](https://code.claude.com/docs/en/plugins-reference) — see `.claude-plugin/marketplace.json` at the repo root and each plugin's own `.claude-plugin/plugin.json` under `plugins/`.
+As Claude Code plugins, `allium-agent` and `allium-analyst` follow the [plugin specification](https://code.claude.com/docs/en/plugins-reference) — see `.claude-plugin/marketplace.json` at the repo root and each plugin's own `.claude-plugin/plugin.json` under `plugins/`. Each plugin's `skills/` directory contains symlinks back to the canonical `skills/<name>/` folders at the repo root, not copies.
 
 ## Official Links
 
