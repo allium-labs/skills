@@ -37,7 +37,7 @@ When users report Wallet API failures, check for these common error patterns:
 | Error | Code | Cause & Fix |
 |---|---|---|
 | `replacement underpriced` | -32602 | Sending a call from the same sender before a pending call confirms. Wait for confirmation or increase fees. |
-| `execution reverted` | -32521 | Calls revert on-chain. Verify correct method, contract address, chain, and ABI encoding. |
+| `execution reverted` | -32521 | Calls revert onchain. Verify correct method, contract address, chain, and ABI encoding. |
 | `AA23 reverted` | -32500 | Sender signature validation reverted or OOG. Check signature and gas limits. |
 | `AA25 invalid account nonce` | -32500 | Nonce reuse. Use a fresh nonce. |
 | `Policy ID(s) not found` | -32600 | Gas sponsorship policy misconfigured. Ensure API key matches the policy's app, policy is active, and network is allowed. |

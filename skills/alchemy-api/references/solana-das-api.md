@@ -309,7 +309,7 @@ curl -s -X POST https://solana-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY \
 - DAS uses named parameters (object), not positional arrays like standard Solana RPC.
 - Asset grouping fields vary by program and collection structure.
 - Pagination is required for large wallets. Use `page` and `limit`.
-- Compressed assets require `getAssetProof` for on-chain operations.
+- Compressed assets require `getAssetProof` for onchain operations.
 
 ## Official Docs
 - [DAS APIs for Solana](https://www.alchemy.com/docs/chains/solana/das-api)

@@ -17,7 +17,7 @@ Transaction streams deliver raw or decoded transaction data in near real-time.
 
 ## Use Cases
 - Real-time analytics pipelines.
-- On-chain alerting and monitoring.
+- Onchain alerting and monitoring.
 
 ## Guidance
 - Filter by program IDs when possible.

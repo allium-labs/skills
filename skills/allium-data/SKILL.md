@@ -5,9 +5,7 @@ description: >-
   analytics on Allium's data warehouse — any table, any timeframe, 150+ chains)
   and Realtime (3-5s freshness lookups for prices, balances, transactions, PnL,
   positions across 80+ chains). Supports API key, x402 micropayments, and
-  Tempo auth. Use when user asks about crypto prices, wallet balances,
-  on-chain analytics, blockchain data, custom SQL on chain data, or any
-  cross-chain comparison. Always use this skill for any Allium data queries.
+  Tempo MPP.
 install: >-
   curl -sSL http://agents.allium.so/cli/install.sh | sh
   Prerequisites: Python package manager (uv, pip, or pipx).

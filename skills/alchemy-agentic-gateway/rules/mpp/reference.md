@@ -55,7 +55,7 @@ Payments are made on these networks (independent of which chain you're querying)
 
 ### Tempo Payment Networks (EVM only)
 
-Tempo uses on-chain USDC on EVM networks. Tempo requires an EVM wallet (SIWE auth).
+Tempo uses onchain USDC on EVM networks. Tempo requires an EVM wallet (SIWE auth).
 
 | Network | CAIP-2 ID | USDC Address | EIP-712 Domain Name |
 |---------|-----------|--------------|---------------------|

@@ -145,8 +145,8 @@ const retryResponse = await fetch(chainUrl, {
   - **EVM**: Uses EIP-3009 gasless `transferWithAuthorization`
   - **Solana**: Uses SVM x402 payment scheme via `@x402/svm`
 - **Amount**: Specified in the 402 response `accepts` array (USDC atomic units, 6 decimals)
-- **Signing**: The `@alchemy/x402` package signs the payment authorization. No on-chain gas is needed from the payer.
-- **Settlement**: The gateway's facilitator submits the signed authorization on-chain.
+- **Signing**: The `@alchemy/x402` package signs the payment authorization. No onchain gas is needed from the payer.
+- **Settlement**: The gateway's facilitator submits the signed authorization onchain.
 
 ## Selecting a Payment Option
 

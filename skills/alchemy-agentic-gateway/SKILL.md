@@ -55,7 +55,7 @@ Before writing application code or making any network call:
 > Which payment protocol would you like to use for the Alchemy Gateway?
 >
 > 1. **x402** — USDC payments via the x402 protocol (uses `Payment-Signature` header, `@alchemy/x402` + `@x402/fetch` libraries). Supports EVM (SIWE) and Solana (SIWS) wallets.
-> 2. **MPP** — Payments via the Merchant Payment Protocol using Tempo (on-chain USDC, EVM only) or Stripe (credit card), via the `mppx` library. EVM (SIWE) only.
+> 2. **MPP** — Payments via the Merchant Payment Protocol using Tempo (onchain USDC, EVM only) or Stripe (credit card), via the `mppx` library. EVM (SIWE) only.
 
 **Do NOT skip this prompt. Do NOT pick a protocol on behalf of the user.** Wait for their explicit choice before proceeding.
 
@@ -75,7 +75,7 @@ Before writing application code or making any network call:
 | Receipt header | `PAYMENT-RESPONSE` | `Payment-Receipt` |
 | Protocol version | `x402/2.0` | `mpp/1.0` |
 | Auth | SIWE (EVM) or SIWS (Solana) | SIWE only (EVM) |
-| Payment methods | USDC via EIP-3009 (EVM) or SVM x402 (Solana) | Tempo (on-chain USDC, EVM only) + Stripe (card, via Stripe.js + SPT) |
+| Payment methods | USDC via EIP-3009 (EVM) or SVM x402 (Solana) | Tempo (onchain USDC, EVM only) + Stripe (card, via Stripe.js + SPT) |
 | Client library | `@alchemy/x402`, `@x402/fetch`, `@x402/axios` | `mppx`, `viem` |
 
 ## Alchemy-first rule

@@ -77,7 +77,7 @@ These apply to all realtime responses:
 - **Money amounts:** `{ "currency": "USD", "amount": "string" }` — `amount` is a string for arbitrary precision (e.g. `"138.681338640813260490"`). Never parse as float for financial calculations.
 - **Timestamps:** Always ISO 8601 UTC in both requests and responses (e.g. `"2025-12-25T00:00:00Z"`). Never compute Unix timestamps manually — LLMs routinely miscalculate them.
 - **Nullable fields:** Present in the response but set to `null`, sometimes omitted entirely. Always check key existence before accessing.
-- **Naming:** `mint` in price history responses = `token_address` in requests = `address` in other responses. All three mean the on-chain contract address.
+- **Naming:** `mint` in price history responses = `token_address` in requests = `address` in other responses. All three mean the onchain contract address.
 
 ---
 

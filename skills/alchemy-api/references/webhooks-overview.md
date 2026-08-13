@@ -1,7 +1,7 @@
 ---
 id: references/webhooks-overview.md
 name: webhooks
-description: Push-based delivery of blockchain events via Alchemy Notify API. Use when you need real-time notifications for address activity, NFT transfers, or custom on-chain events instead of polling. Covers webhook creation, payload formats, signature verification, and filtering.
+description: Push-based delivery of blockchain events via Alchemy Notify API. Use when you need real-time notifications for address activity, NFT transfers, or custom onchain events instead of polling. Covers webhook creation, payload formats, signature verification, and filtering.
 tags: []
 related: []
 updated: 2026-02-14

@@ -12,7 +12,7 @@ You MUST ask the user which payment method they want to use. Present this prompt
 
 > How would you like to pay for API requests?
 >
-> 1. **Tempo** — on-chain USDC payment (gasless, EVM wallet required). Requires a wallet funded with USDC.
+> 1. **Tempo** — onchain USDC payment (gasless, EVM wallet required). Requires a wallet funded with USDC.
 > 2. **Stripe** — credit card payment. No wallet funding needed — just a card.
 
 **Do NOT skip this prompt. Do NOT pick a payment method on behalf of the user.** Wait for their explicit choice before proceeding.
