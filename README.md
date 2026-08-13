@@ -68,7 +68,7 @@ Contributed by ecosystem partners — see [`PARTNERS.md`](PARTNERS.md) for conve
 - **`alchemy-agentic-gateway`** — wire Alchemy into application code without an API key, using x402 or MPP with wallet-based auth and per-request payments. Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](skills/alchemy-agentic-gateway/SKILL.md)
 - **`alchemy-api`** — build production application code on Alchemy infrastructure with an Alchemy API key (EVM JSON-RPC, WebSocket subscriptions, webhooks, Account Kit, Account Abstraction, simulation, Solana, Sui gRPC). Built and maintained by [Alchemy](https://www.alchemy.com/). [Entry point](skills/alchemy-api/SKILL.md)
 
-## `allium-analyst` — analyst methodology
+## `allium-analyst` — blockchain analytics processes
 
 Two skills that chain together for any analytical question:
 
