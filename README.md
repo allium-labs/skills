@@ -53,7 +53,7 @@ without the plugin system at all (see Getting Started below).
    If it checks Terminal for existing coverage, picks a real table instead of guessing,
    and hands you back a saved Explorer query at the end, the skills are wired up correctly.
 
-## `allium-agent` — data access
+## `allium-agent` — agentic data access
 
 ### `allium-data`
 Query blockchain data using the `allium` CLI. Two products: Explorer (SQL analytics on Allium's data warehouse — any table, any timeframe, 150+ chains) and Realtime (3-5s freshness lookups for prices, balances, transactions, PnL, positions across 80+ chains). Supports API key, x402 micropayments, and Tempo auth.
