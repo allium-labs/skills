@@ -125,5 +125,5 @@ possible.
 
 Table and column names move as this schema evolves, so don't hard-code any of the names
 above from memory. Run `data-matching` first to confirm the current tables for your
-specific question, and use `search_schemas`/`search_docs` (or `browse_schemas`) directly
+specific question, and use `search_schemas`/`search_docs` directly
 if you need to double check a column before writing SQL.
