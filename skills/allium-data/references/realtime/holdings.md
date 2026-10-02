@@ -8,7 +8,7 @@ All commands output JSON by default. Use `--format table` for human-readable out
 
 `POST /api/v1/developer/wallet/holdings/history`
 
-Get historical aggregated USD holdings for an address.
+Get historical aggregated USD holdings for one or more addresses.
 
 #### Request
 
@@ -18,9 +18,9 @@ Get historical aggregated USD holdings for an address.
 | `--end-timestamp` | string | Yes | End of time range (UTC ISO 8601) |
 | `--granularity` | string | Yes | Time interval granularity (15s, 1m, 5m, 1h, 1d) |
 | `--addresses` | array of objects | Yes | List of wallet chain+address pairs |
-| `--include-token-breakdown` | boolean | No | If true, includes per-token breakdown in each interval (default: `False`) |
-| `--min-liquidity` | number or null | No | Minimum USD liquidity threshold to include a token |
+| `--include-token-breakdown` | boolean | No | If true, includes per-token breakdown in each interval |
 | `--cursor` | string | No | cursor |
+| `--min-liquidity` | number | No | Minimum USD liquidity threshold to include a token |
 
 **Example:**
 
@@ -51,6 +51,46 @@ allium realtime holdings history \
 | `items[].token_breakdown[].liquidity` | object or null | No | Token liquidity info |
 | `items[].token_breakdown[].liquidity.amount` | number or null | No | Liquidity amount (USD) |
 | `items[].token_breakdown[].liquidity.details` | string or null | No | Status when amount unavailable (e.g. LIQUIDITY_TOO_HIGH) |
+
+**Example:**
+
+```json
+{
+  "items": [
+    {
+      "address": "0x8e0e6fbaf18f209916bb7c5960a70d6bb5760938",
+      "amount": {
+        "amount": 297231.67,
+        "currency": "USD"
+      },
+      "chain": "ethereum",
+      "timestamp": "2026-04-12T00:00:00Z",
+      "token_breakdown": [
+        {
+          "amount": {
+            "amount": 79905.56,
+            "currency": "USD"
+          },
+          "liquidity": {
+            "details": "LIQUIDITY_TOO_HIGH"
+          },
+          "token_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        {
+          "amount": {
+            "amount": 622.15,
+            "currency": "USD"
+          },
+          "liquidity": {
+            "amount": 2427432.99
+          },
+          "token_address": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce"
+        }
+      ]
+    }
+  ]
+}
+```
 
 > Access: `items[]` for the result items.
 
