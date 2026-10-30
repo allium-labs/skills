@@ -3,7 +3,7 @@
 ## Step 1: Install CLI
 
 ```bash
-curl -sSL http://agents.allium.so/cli/install.sh | sh
+curl -sSL https://agents.allium.so/cli/install.sh | sh
 ```
 
 Verify: `allium --help`. If `allium: command not found`, add `~/.local/bin` to PATH and re-source your shell.

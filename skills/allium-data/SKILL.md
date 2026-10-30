@@ -7,7 +7,7 @@ description: >-
   positions across 80+ chains). Supports API key, x402 micropayments, and
   Tempo MPP.
 install: >-
-  curl -sSL http://agents.allium.so/cli/install.sh | sh
+  curl -sSL https://agents.allium.so/cli/install.sh | sh
   Prerequisites: Python package manager (uv, pip, or pipx).
   Restart your shell after install, then run: allium auth setup
 refetch_after: 30d
